@@ -68,7 +68,7 @@ class UrlUtils:
             parsed.scheme,
             parsed.netloc,
             path,
-            parsed.params, 
+            parsed.params,
             parsed.query,
             ''  # Remove fragments
         ))
@@ -267,7 +267,7 @@ class WebCrawler:
 
         # Queue HTML pages from same domain for crawling
         next_depth = depth + 1
-        if (UrlUtils.get_base_domain(normalized_url) == self.base_domain and 
+        if (UrlUtils.get_base_domain(normalized_url) == self.base_domain and
             category == LinkCategory.PAGE and
             next_depth <= self.config.max_depth and
             normalized_url not in self.visited_urls and
@@ -303,7 +303,7 @@ async def main(args):
     """Main entry point for the crawler."""
     config = CrawlConfig(
         start_url=args.url,
-        output_file=args.output,
+        output_file=os.path.join("data", args.output),
         delay=args.delay,
         max_depth=args.depth,
         timeout=args.timeout,
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     parser.add_argument('--concurrency', type=int, default=5, help='Number of concurrent requests')
     parser.add_argument('--ignore-robots', action='store_true', help='Ignore robots.txt restrictions')
     parser.add_argument('--user-agent', default='DeepCrawler/1.0', help='User-Agent string')
-    parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], 
+    parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
                         help='Logging level')
 
     args = parser.parse_args()
