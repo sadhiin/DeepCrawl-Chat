@@ -21,5 +21,10 @@ dependencies = [
     "faiss-cpu (>=1.10.0,<2.0.0)",
     "langchain-qdrant (>=0.2.0,<0.3.0)",
     "pytest>=8.3.5",
+    "fastapi[all]>=0.115.12",
+    "uvicorn>=0.34.2",
+    "asyncio>=3.4.3",
+    "aiohttp>=3.11.16",
+    "aiofiles>=24.1.0",
 ]
 
