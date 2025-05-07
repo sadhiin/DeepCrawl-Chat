@@ -25,3 +25,11 @@ dependencies = [
     "requests>=2.32.3",
     "unstructured>=0.17.2",
 ]
+
+[dependency-groups]
+dev = [
+    "deepcrawl-chat",
+]
+
+[tool.uv.sources]
+deepcrawl-chat = { workspace = true }

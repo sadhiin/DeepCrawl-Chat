@@ -1,0 +1,6 @@
+type: postgres
+host: ${oc.env:DB_HOST}
+port: 5432
+username: ${oc.env:DB_USER}
+password: ${oc.env:DB_PASSWORD}
+db_name: ${oc.env:DB_NAME}

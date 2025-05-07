@@ -1,24 +1,7 @@
 defaults:
-  - core: default
-  - data_processing: default
   - _self_
-
-# core:
-#   _target_: smart_rag.core.schemas.CoreConfig # Link to Pydantic schema
-#   embedding: default
-#   llm: default
-#   vector_store: default
-#   retriever: default # Add a default retriever config section if needed
-
-# data_processing:
-#   _target_: smart_rag.core.schemas.DataProcessingConfig
-#   chunker: default
-
-# Application specific settings
-# app:
-#   _target_: smart_rag.core.schemas.AppConfig
-#   retrieval_k: 5 # Number of chunks to retrieve
-#   data_dir: "data" # Directory for FAISS index/map
+  - database: postgres
+  - vectorstore: default
 
 hydra:
   run:

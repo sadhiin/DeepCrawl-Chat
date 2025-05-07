@@ -1,47 +1,37 @@
-import os
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Union, Literal
-from pydantic import field_validator
+from dataclasses import dataclass
+from typing import Any, Dict
+from pydantic import parse_obj_as
+from pydantic_settings import BaseSettings
 
-from .schemas import (
-    DatabaseConfig, 
-    VectorStoreConfig, 
-    
-    get_database_config, 
-    get_vector_store_config
-)
+from hydra import initialize, compose
+from hydra.core.config_store import ConfigStore
 
-class AppConfig(BaseSettings):
-    model_config: SettingsConfigDict = SettingsConfigDict(
-        env_file=".env",
-        extra="ignore",
-        env_file_encoding="utf-8"
-    )
+from src.deepcrawl_chat.config.schemas import DatabaseConfigUnion, VectorStoreConfigUnion
 
-    # Instantiate specific configs
-    database: DatabaseConfig = None
-    vector_store: VectorStoreConfig = None
+@dataclass
+class AppConfigHydra:
+    database: Dict[str, Any]
+    vector_store: Dict[str, Any]
 
+cs = ConfigStore.instance()
+cs.store(name="app_config", node=AppConfigHydra)
 
-    # Load the dynamic configurations from environment variables
-    
-    @field_validator("database", mode='before')
-    def load_database(cls, v, values):
-        # Load raw dict from environment or file
-        config_data = {
-            "type": os.getenv("DB_TYPE", "sqlite"),
-            "filepath": os.getenv("SQLITE_FILEPATH", "sqlite.db"),
-        }
-        return get_database_config(config_data)
+def config_setting():
+    with initialize(config_path="../../../configs"):
+        cfg = compose(config_name="config")
 
-    @field_validator("vector_store", mode='before')
-    def load_vector_store(cls, v, values):
-        config_data = {
-            "type": os.getenv("VSTORE_TYPE", "faiss"),
-            "index_path": os.getenv("FAISS_INDEX_PATH", "faiss.index"),
-            "collection_name": os.getenv("CHROMA_COLLECTION", "my_collection"),
-        }
-        return get_vector_store_config(config_data)
+        db_config = parse_obj_as(DatabaseConfigUnion, cfg.database)
+        vs_config = parse_obj_as(VectorStoreConfigUnion, cfg.vectorstore)
 
-# Instantiate
-settings = AppConfig()
+        class AppConfig(BaseSettings):
+            database: DatabaseConfigUnion
+            vector_store: VectorStoreConfigUnion
+
+        app_config = AppConfig(database=db_config, vector_store=vs_config)
+
+        print("Database connection string:", app_config.database.get_connection_string())
+        print("Vector store info:", app_config.vector_store.get_store())
+
+        return app_config
+
+setting = config_setting()
