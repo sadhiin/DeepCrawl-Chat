@@ -18,21 +18,19 @@ class AppConfig(BaseSettings):
         env_file_encoding="utf-8"
     )
 
-    # Load raw configs from environment
-    database_config_data: dict = {}  # Load from env or file
-    vector_store_config_data: dict = {}  # Load from env or file
-
     # Instantiate specific configs
     database: DatabaseConfig = None
     vector_store: VectorStoreConfig = None
 
+
+    # Load the dynamic configurations from environment variables
+    
     @field_validator("database", mode='before')
     def load_database(cls, v, values):
         # Load raw dict from environment or file
         config_data = {
             "type": os.getenv("DB_TYPE", "sqlite"),
             "filepath": os.getenv("SQLITE_FILEPATH", "sqlite.db"),
-            # add other params as needed
         }
         return get_database_config(config_data)
 
@@ -47,7 +45,3 @@ class AppConfig(BaseSettings):
 
 # Instantiate
 settings = AppConfig()
-
-# # Usage
-# db_conn_str = settings.database.get_connection_string()
-# vector_store_instance = settings.vector_store.get_store()
