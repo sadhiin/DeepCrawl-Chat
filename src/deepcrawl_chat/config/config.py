@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
+
 from pydantic_settings import BaseSettings
 
 from hydra import initialize, compose
@@ -17,11 +18,11 @@ cs = ConfigStore.instance()
 cs.store(name="app_config", node=AppConfigHydra)
 
 def config_setting():
-    with initialize(config_path="../../../configs"):
+    with initialize(config_path="../../../configs", version_base='1.2'):
         cfg = compose(config_name="config")
 
-        db_config = parse_obj_as(DatabaseConfigUnion, cfg.database)
-        vs_config = parse_obj_as(VectorStoreConfigUnion, cfg.vectorstore)
+        db_config = TypeAdapter(DatabaseConfigUnion).validate_python(cfg.database)  # Use TypeAdapter
+        vs_config = TypeAdapter(VectorStoreConfigUnion).validate_python(cfg.vectorstore)  # Use TypeAdapter
 
         class AppConfig(BaseSettings):
             database: DatabaseConfigUnion
