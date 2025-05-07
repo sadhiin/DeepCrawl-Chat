@@ -1,0 +1,3 @@
+type: "chroma"
+persist_directory: "chroma_local_index"
+collection_name: "deepcrawl_collection"

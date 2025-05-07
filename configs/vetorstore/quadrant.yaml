@@ -1,0 +1,8 @@
+type: "quadrant"
+persist_directory: "quadrant_local_index"
+collection_name: "deepcrawl_collection"
+metadata_fields:
+  - "url"
+  - "content"
+  - "timestamp"
+  - "source"

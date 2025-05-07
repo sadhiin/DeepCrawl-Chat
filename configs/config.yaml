@@ -14,7 +14,7 @@ defaults:
 #   _target_: smart_rag.core.schemas.DataProcessingConfig
 #   chunker: default
 
-# # Application specific settings
+# Application specific settings
 # app:
 #   _target_: smart_rag.core.schemas.AppConfig
 #   retrieval_k: 5 # Number of chunks to retrieve

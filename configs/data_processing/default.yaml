@@ -1,0 +1,2 @@
+chunk: 1000
+chunk_overlap: ${0.15*chunk}
