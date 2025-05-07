@@ -1,6 +1,6 @@
 [project]
 name = "deepcrawl-chat"
-version = "0.1.0"
+version = "0.1.2"
 description = "Crawl a website and chat with it."
 authors = [
     {name = "Shanjidul Islam Sadhin",email = "sadhin.aiub.cse@gmail.com"}
