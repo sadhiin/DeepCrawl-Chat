@@ -5,12 +5,12 @@ from typing import List, Optional
 import logging
 from pathlib import Path
 
-from src.data.crawl_loader import CrawlResultLoader
-from src.data.processors import DeepCrawlTextSplitter
-from src.embeddings.models import get_embeddings_model
-from src.vectorstores.faiss_store import get_or_create_vectorstore
+# from src.data.crawl_loader import CrawlResultLoader
+# from src.data.processors import DeepCrawlTextSplitter
+# from src.embeddings.models import get_embeddings_model
+# from src.vectorstores.faiss_store import get_or_create_vectorstore
 
-from 
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,8 @@ class CrawlRAGPipeline:
             output_file=crawl_path,
             max_depth=max_depth
         )
-
+        # TODO: add the crawling and indexing + save in to the vector store and database
+        
         crawler = WebCrawler(config)
         await crawler.crawl()
         crawler.export_links_to_csv()

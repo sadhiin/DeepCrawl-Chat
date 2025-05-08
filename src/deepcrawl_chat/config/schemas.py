@@ -1,3 +1,4 @@
+from numpy import append
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from typing import Union, Literal, Annotated
@@ -72,3 +73,22 @@ VectorStoreConfigUnion = Annotated[
     Union[FaissConfig, ChromaConfig],
     Field(discriminator="type")
 ]
+
+
+
+## ------------------------------------ Base class for LLM Configs ------------------------------------ ##
+
+class LLMConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+        env_file_encoding="utf-8"
+    )
+
+    type: str
+    api_endpoint: str
+    api_key: str
+    model_name: str
+    temperature: float
+    max_tokens: int
+    top_p: float = 0.7
