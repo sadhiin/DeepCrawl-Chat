@@ -1,9 +1,11 @@
-from src.utils.logging import logger
+from deepcrawl_chat.utils import create_logger
 from langchain_community.document_loaders import UnstructuredURLLoader, WebBaseLoader
-from config.settings import settings
+from deepcrawl_chat.utils import DocumentLoadingError
+
+logger = create_logger()
 
 class DocumentLoader:
-    def __init__(self, loader_type=settings.DOCUMENT_LOADER):
+    def __init__(self, loader_type="unstructured"):
         self.loader_type = loader_type
 
     def load_from_urls(self, urls, max_urls=None):
@@ -24,5 +26,5 @@ class DocumentLoader:
         except Exception as e:
             # Log the error with proper context
             logger.error(f"Error loading documents: {str(e)}")
-            # Potentially return partial results or retry logic
+
             raise DocumentLoadingError(f"Failed to load documents: {str(e)}")

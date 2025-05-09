@@ -6,7 +6,7 @@ from aiohttp import ClientTimeout
 import logging
 from urllib.robotparser import RobotFileParser
 
-from deepcrawl_chat.crawler.schema import LinkCategory
+from deepcrawl_chat.schemas.crawling_schema import LinkCategory
 
 class UrlUtils:
     """URL utility functions."""

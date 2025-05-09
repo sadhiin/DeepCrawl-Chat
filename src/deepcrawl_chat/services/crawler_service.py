@@ -49,7 +49,7 @@ class CrawlerService:
                 self.redis.hincrby(
                     f"crawl:{crawl_request.chat_id}",
                     "pages_crawled",
-                    1
+                
                 )
 
             # Mark as complete

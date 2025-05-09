@@ -1,27 +1,30 @@
 import logging
-import time
-from functools import wraps
+import os
+from datetime import datetime
 
-logger = logging.getLogger("deepcrawl")
 
-def setup_logging(level=logging.INFO):
-    """Configure logging"""
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler("deepcrawl.log")
-        ]
-    )
+def create_logger(name="deepcrawl_chat", filename=f"{datetime.now().strftime('%Y-%m-%d')}.log"):
+    log_dir = './logs'
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
-def time_it(func):
-    """Decorator to measure function execution time"""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        logger.info(f"{func.__name__} took {end_time - start_time:.2f} seconds to execute")
-        return result
-    return wrapper
+    logger = logging.getLogger(name)
+
+    if not logger.hasHandlers():
+        logger.setLevel(logging.DEBUG)
+
+        log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(filename)s - %(lineno)d - %(message)s')
+
+        # Console handler
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        console_handler.setFormatter(log_format)
+        logger.addHandler(console_handler)
+
+        # File handler
+        file_handler = logging.FileHandler(os.path.join(log_dir, filename))
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(log_format)
+        logger.addHandler(file_handler)
+
+    return logger

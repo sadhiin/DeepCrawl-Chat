@@ -2,11 +2,11 @@ import pandas as pd
 from typing import List, Optional, Dict, Any
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.docstore.document import Document
-import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+from deepcrawl_chat.utils import create_logger
 
-logger = logging.getLogger(__name__)
+logger = create_logger()
 
 class CrawlResultLoader:
     """Load documents from crawl results CSV file."""
@@ -110,4 +110,4 @@ class CrawlResultLoader:
             return docs
         except Exception as e:
             logger.warning(f"Failed to load {url}: {e}")
-            return [] 
+            return []

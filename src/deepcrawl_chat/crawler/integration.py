@@ -2,7 +2,6 @@ import os
 import asyncio
 import time
 from typing import List, Optional
-import logging
 from pathlib import Path
 
 # from src.data.crawl_loader import CrawlResultLoader
@@ -10,9 +9,11 @@ from pathlib import Path
 # from src.embeddings.models import get_embeddings_model
 # from src.vectorstores.faiss_store import get_or_create_vectorstore
 
+from deepcrawl_chat.crawler import WebCrawler
+from deepcrawl_chat.schemas.crawling_schema import CrawlConfig
 
-
-logger = logging.getLogger(__name__)
+from deepcrawl_chat.utils.logging import setup_logging
+logger = setup_logging()
 
 class CrawlRAGPipeline:
     """Pipeline for crawling websites and setting up RAG."""
@@ -59,7 +60,7 @@ class CrawlRAGPipeline:
         crawl_path = os.path.join(self.output_dir, crawl_filename)
 
         # Import and run the crawler
-        from src.deep_crawler.crawler import WebCrawler, CrawlConfig
+        
 
         config = CrawlConfig(
             start_url=url,

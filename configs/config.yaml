@@ -1,7 +1,13 @@
 defaults:
   - _self_
-  - database: postgres
+  - database: default
   - vectorstore: default
+
+
+app:
+  name: "DeepCrawl Chat"
+  version: "1.0.1"
+  log_dir: "logs"
 
 hydra:
   run:

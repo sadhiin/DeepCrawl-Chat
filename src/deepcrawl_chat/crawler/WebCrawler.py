@@ -6,12 +6,14 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import re
 import csv
-import logging
 from collections import defaultdict
 from aiohttp import ClientTimeout
 
-from deepcrawl_chat.crawler.schema import CrawlConfig, LinkCategory
+from deepcrawl_chat.schemas.crawling_schema import CrawlConfig, LinkCategory
 from deepcrawl_chat.crawler.utils import UrlUtils, RobotsTxtManager
+from deepcrawl_chat.utils import create_logger
+
+logger = create_logger()
 
 
 class WebCrawler:
@@ -25,16 +27,9 @@ class WebCrawler:
         self.discovered_links: Dict[str, Set[str]] = defaultdict(set)
         self.robots_manager = RobotsTxtManager(config.user_agent)
 
-        # Configure logging
-        logging.basicConfig(
-            level=getattr(logging, config.log_level),
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-
     async def crawl(self) -> Dict[str, Set[str]]:
         """Main crawling method."""
-        logging.info(f"Starting crawl at {self.config.start_url} with max depth {self.config.max_depth}")
+        logger.info(f"Starting crawl at {self.config.start_url} with max depth {self.config.max_depth}")
 
         async with aiohttp.ClientSession(
             headers={"User-Agent": self.config.user_agent},
@@ -53,14 +48,14 @@ class WebCrawler:
                 if self.config.respect_robots_txt:
                     can_fetch = await self.robots_manager.can_fetch(session, url)
                     if not can_fetch:
-                        logging.info(f"Skipping {url} (disallowed by robots.txt)")
+                        logger.info(f"Skipping {url} (disallowed by robots.txt)")
                         continue
 
                 # Add task to process the URL
                 task = asyncio.create_task(self.process_url(url, depth, session, semaphore))
                 tasks.append(task)
 
-                # Add a small delay between starting tasks
+                # Add a small delay between starting task    s
                 if self.config.delay > 0:
                     await asyncio.sleep(self.config.delay)
 
@@ -73,6 +68,8 @@ class WebCrawler:
     async def process_url(self, url: str, depth: int, session: aiohttp.ClientSession, semaphore: asyncio.Semaphore):
         """Process a single URL."""
         if url in self.visited_urls:
+            # TODO: Handle already visited URLs
+            # we can add the document loader here.
             return
 
         self.visited_urls.add(url)
@@ -80,11 +77,11 @@ class WebCrawler:
         for attempt in range(self.config.max_retries):
             try:
                 async with semaphore:
-                    logging.debug(f"Crawling: {url} (depth: {depth}, attempt: {attempt+1})")
+                    logger.debug(f"Crawling: {url} (depth: {depth}, attempt: {attempt+1})")
 
                     async with session.get(url) as response:
                         if response.status != 200:
-                            logging.warning(f"Failed to fetch {url} - Status {response.status}")
+                            logger.warning(f"Failed to fetch {url} - Status {response.status}")
                             continue
 
                         # Add URL to appropriate category
@@ -94,7 +91,7 @@ class WebCrawler:
                         # Only parse HTML content for extraction
                         content_type = response.headers.get('Content-Type', '').lower()
                         if 'text/html' not in content_type:
-                            logging.debug(f"Skipping non-HTML content: {url}")
+                            logger.debug(f"Skipping non-HTML content: {url}")
                             return
 
                         html_content = await response.text()
