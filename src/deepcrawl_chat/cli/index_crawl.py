@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 import argparse
-import logging
 import sys
 import os
 
 # Add the project root to sys.path if needed
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from src.deep_crawler.integration import CrawlRAGPipeline
-from src.utils.logging import setup_logging
+from deepcrawl_chat.crawler.WebCrawler import WebCrawler
+from deepcrawl_chat.utils import create_logger
 
 def main():
     """Main entry point for indexing crawl results."""
@@ -26,8 +25,7 @@ def main():
     args = parser.parse_args()
 
     # Setup logging
-    setup_logging(args.log_level)
-    logger = logging.getLogger(__name__)
+    logger = create_logger(args.log_level)
 
     try:
         # Create and run the pipeline

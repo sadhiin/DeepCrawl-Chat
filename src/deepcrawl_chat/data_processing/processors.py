@@ -1,5 +1,5 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
+from .loaders import DocumentLoader
 
 class DeepCrawlTextSplitter:
     def __init__(self, chunk_size=5000, chunk_overlap=100):
@@ -9,3 +9,22 @@ class DeepCrawlTextSplitter:
         return self.splitter.split_documents(documents)
 
 
+class DeepCrawlDocumentProcessor:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def process_document(url:str):
+        loader = DocumentLoader()
+        documents = loader.load_from_urls([url])
+        splitter = DeepCrawlTextSplitter()
+        chunks = splitter.split_documents(documents)
+        return chunks
+
+    @staticmethod
+    def process_documents(urls:list[str]):
+        loader = DocumentLoader()
+        documents = loader.load_from_urls(urls)
+        splitter = DeepCrawlTextSplitter()
+        chunks = splitter.split_documents(documents)
+        return chunks

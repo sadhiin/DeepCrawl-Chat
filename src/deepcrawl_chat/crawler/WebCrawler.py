@@ -70,6 +70,18 @@ class WebCrawler:
         if url in self.visited_urls:
             # TODO: Handle already visited URLs
             # we can add the document loader here.
+            from deepcrawl_chat.data_processing.loaders import DocumentLoader
+            from deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
+
+            loader = DocumentLoader()
+            documents = loader.load_from_urls([url])
+            splitter = DeepCrawlTextSplitter()
+            chunks = splitter.split_documents(documents)
+
+            # Add to vector store
+            from deepcrawl_chat.vector_stores import ChromaVectorStore
+
+    
             return
 
         self.visited_urls.add(url)
