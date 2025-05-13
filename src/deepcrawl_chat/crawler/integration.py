@@ -5,15 +5,14 @@ from typing import List, Optional
 from pathlib import Path
 
 # from src.data.crawl_loader import CrawlResultLoader
-# from src.data.processors import DeepCrawlTextSplitter
-# from src.embeddings.models import get_embeddings_model
-# from src.vectorstores.faiss_store import get_or_create_vectorstore
-
-from deepcrawl_chat.crawler import WebCrawler
+from deepcrawl_chat.data_processing import DeepCrawlTextSplitter, CrawlResultLoader
+from deepcrawl_chat.embeddings import EmbeddingModel
+from deepcrawl_chat.vectorstores import FAISSVectorStore
+from .web_crawler import WebCrawler
 from deepcrawl_chat.schemas.crawling_schema import CrawlConfig
 
-from deepcrawl_chat.utils.logging import setup_logging
-logger = setup_logging()
+from deepcrawl_chat.utils import create_logger
+logger = create_logger(__name__)
 
 class CrawlRAGPipeline:
     """Pipeline for crawling websites and setting up RAG."""
@@ -73,8 +72,8 @@ class CrawlRAGPipeline:
         await crawler.crawl()
         crawler.export_links_to_csv()
 
-        # Index the crawled results
-        return self.index_crawl_results(crawl_path)
+        # # Index the crawled results
+        # return self.index_crawl_results(crawl_path)
 
     def index_crawl_results(self, csv_path: str, url_type: str = "page") -> str:
         """
@@ -102,14 +101,15 @@ class CrawlRAGPipeline:
         chunks = text_splitter.split_documents(documents)
 
         # Get the embedding model
-        embeddings_model = get_embeddings_model()
-
+        embeddings_model = EmbeddingModel().get_embeddings_model()
+        vectore_store = FAISSVectorStore(embeddings_model, cache_dir=self.vector_store_dir)
         # Generate store identifier
         store_name = os.path.basename(csv_path).replace(".csv", "")
         store_path = os.path.join(self.vector_store_dir, store_name)
 
         # Create and save the vector store
-        vectorstore = get_or_create_vectorstore(chunks, embeddings_model, cache_dir=store_path)
+        vectorstore = vectore_store.load_or_create(chunks)
+        vectorstore.save_local(store_path)
 
         logger.info(f"Created vector store at {store_path} with {len(chunks)} chunks")
         return store_path

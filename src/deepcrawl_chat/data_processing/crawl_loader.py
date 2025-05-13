@@ -1,12 +1,12 @@
+from tqdm import tqdm
 import pandas as pd
 from typing import List, Optional, Dict, Any
-from langchain_community.document_loaders import WebBaseLoader
 from langchain.docstore.document import Document
+from langchain_community.document_loaders import WebBaseLoader
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tqdm import tqdm
 from deepcrawl_chat.utils import create_logger
 
-logger = create_logger()
+logger = create_logger(__name__)
 
 class CrawlResultLoader:
     """Load documents from crawl results CSV file."""

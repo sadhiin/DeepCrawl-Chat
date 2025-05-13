@@ -1,11 +1,11 @@
 import asyncio
 import aiofiles
 import aiohttp
+import re
+import csv
 from typing import Dict, Set, List, Optional
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
-import re
-import csv
 from collections import defaultdict
 from aiohttp import ClientTimeout
 
@@ -13,8 +13,17 @@ from deepcrawl_chat.schemas.crawling_schema import CrawlConfig, LinkCategory
 from deepcrawl_chat.crawler.utils import UrlUtils, RobotsTxtManager
 from deepcrawl_chat.utils import create_logger
 
-logger = create_logger()
+from deepcrawl_chat.vectorstores import FAISSVectorStore
+from deepcrawl_chat.embeddings import EmbeddingModel
+from deepcrawl_chat.data_processing.loaders import DocumentLoader
+from deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
 
+loader = DocumentLoader()
+vector_store = FAISSVectorStore(
+    embeddings_model = EmbeddingModel().get_embeddings_model()
+)
+
+logger = create_logger(__name__)
 
 class WebCrawler:
     """Asynchronous web crawler with improved features."""
@@ -70,19 +79,16 @@ class WebCrawler:
         if url in self.visited_urls:
             # TODO: Handle already visited URLs
             # we can add the document loader here.
-            from deepcrawl_chat.data_processing.loaders import DocumentLoader
-            from deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
-
-            loader = DocumentLoader()
+            
             documents = loader.load_from_urls([url])
             splitter = DeepCrawlTextSplitter()
             chunks = splitter.split_documents(documents)
 
             # Add to vector store
-            from deepcrawl_chat.vector_stores import ChromaVectorStore
-
-    
-            return
+            
+            # vector_store.add_documents(chunks)
+            
+            return await vector_store.load_or_create_async(chunks)
 
         self.visited_urls.add(url)
 
@@ -111,16 +117,16 @@ class WebCrawler:
                         return
 
             except asyncio.TimeoutError:
-                logging.warning(f"Timeout while fetching {url} (attempt {attempt+1})")
+                logger.warning(f"Timeout while fetching {url} (attempt {attempt+1})")
             except Exception as e:
-                logging.error(f"Error processing {url}: {str(e)}")
+                logger.error(f"Error processing {url}: {str(e)}")
 
-        logging.error(f"Failed to process {url} after {self.config.max_retries} attempts")
+        logger.error(f"Failed to process {url} after {self.config.max_retries} attempts")
 
     async def extract_links(self, url: str, html_content: str, depth: int):
         """Extract links from HTML content."""
         soup = BeautifulSoup(html_content, 'html.parser')
-        logging.info(f"Processing: {url} (Found {len(soup.find_all('a'))} links)")
+        logger.info(f"Processing: {url} (Found {len(soup.find_all('a'))} links)")
 
         # Extract regular links
         for a_tag in soup.find_all('a', href=True):
@@ -183,16 +189,16 @@ class WebCrawler:
                 for url in urls:
                     writer.writerow([link_type, url])
 
-        logging.info(f"Links exported to {output_path}")
+        logger.info(f"Links exported to {output_path}")
 
     def print_summary(self):
         """Print a summary of the crawl results."""
         total_links = sum(len(links) for links in self.discovered_links.values())
 
-        logging.info("\nCrawl Summary:")
-        logging.info(f"Total links discovered: {total_links}")
+        logger.info("\nCrawl Summary:")
+        logger.info(f"Total links discovered: {total_links}")
         for link_type, urls in self.discovered_links.items():
-            logging.info(f"  {link_type}: {len(urls)}")
+            logger.info(f"  {link_type}: {len(urls)}")
 
 
 
