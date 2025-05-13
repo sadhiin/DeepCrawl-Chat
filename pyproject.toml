@@ -19,9 +19,12 @@ dependencies = [
     "langchain>=0.3.23",
     "langchain-community>=0.3.21",
     "langchain-text-splitters>=0.3.8",
+    "langgraph>=0.4.3",
+    "langsmith>=0.3.32",
     "pydantic-settings>=2.9.1",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
+    "redis>=6.1.0",
     "requests>=2.32.3",
     "unstructured>=0.17.2",
 ]

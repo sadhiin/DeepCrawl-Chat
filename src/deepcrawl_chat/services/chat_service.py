@@ -3,7 +3,6 @@ from platform import processor
 from ast import arg
 from shutil import move
 from tokenize import endpats
-from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalQA
 from more_itertools import padded
 from matplotlib.dviread import Page
