@@ -5,14 +5,16 @@ from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
 
 load_dotenv()
-os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+
+os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY", None)
 
 class LLModel:
     def __init__(self) -> None:
-        
-        # Initialize the model with environment variables
-        self.model = init_chat_model(
+        pass
+    
+    @staticmethod
+    def get_model():
+        return init_chat_model(
             os.getenv("LLM_MODEL_NAME"),
             model_provider=os.getenv("LLM_MODEL_PROVIDER")
         )
-        self.model_name = os.getenv("LLM_MODEL_NAME")

@@ -1,0 +1,8 @@
+type: nvidia
+api_provider: nvidia
+model: deepseek-ai/deepseek-r1-distill-llama-8b
+api_key: ${oc.env:NVIDIA_API_KEY,''}
+api_endpoint: https://api.nvidia.com/llm
+temperature: 0.5
+max_tokens: 4096
+top_p: 0.9

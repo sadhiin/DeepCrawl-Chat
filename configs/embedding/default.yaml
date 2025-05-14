@@ -1,3 +1,6 @@
 api_provider: "nvidia"
 model: "nvidia/llama-3.2-nv-embedqa-1b-v2"
 api_key: ${oc.env:NVIDIA_API_KEY}
+
+chunk_size: 5000
+chunk_overlap: ${0.15*chunk_size}

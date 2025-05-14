@@ -1,0 +1,8 @@
+type: groq
+api_provider: groq
+model_name: llama-3.1-8b-instant
+api_key: ${oc.env:GROQ_API_KEY,''}
+api_endpoint: https://api.groq.com/llm
+temperature: 0.5
+max_tokens: 4096
+top_p: 0.9

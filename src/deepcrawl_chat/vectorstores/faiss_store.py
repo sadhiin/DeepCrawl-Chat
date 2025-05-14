@@ -78,7 +78,10 @@ class FAISSVectorStore:
         # Try to load from cache first
         if os.path.exists(store_path):
             try:
-                self.vectorstore = await FAISS.load_local(store_path, self.embeddings_model, asynchronous=True)
+                self.vectorstore = await FAISS.load_local(
+                    store_path, 
+                    self.embeddings_model, 
+                    asynchronous=True)
                 logger.info(f"Loaded vector store async from {store_path}")
                 return self.vectorstore
             except Exception as e:

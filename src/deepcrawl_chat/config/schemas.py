@@ -92,3 +92,35 @@ class LLMConfig(BaseSettings):
     temperature: float
     max_tokens: int
     top_p: float = 0.7
+    
+class GeminiLLMConfig(LLMConfig):
+    type: Literal["google"]
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("GEMINI_API_ENDPOINT", "https://generativelanguage.googleapis.com/v1beta/openai/"))
+    api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", "your_api_key"))
+    model_name: str = Field(default_factory=lambda: os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"))
+    temperature: float = Field(default_factory=lambda: float(os.getenv("GEMINI_TEMPERATURE", 0.7)))
+    max_tokens: int = Field(default_factory=lambda: int(os.getenv("GEMINI_MAX_TOKENS", 1024)))
+    top_p: float = Field(default_factory=lambda: float(os.getenv("GEMINI_TOP_P", 0.7)))
+    
+class NvidiaLLMConfig(LLMConfig):
+    type : Literal["nvidia"]
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/llm"))
+    api_key: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_KEY", "your_api_key"))
+    model_name: str = Field(default_factory=lambda: os.getenv("NVIDIA_MODEL_NAME", "nvidia-llm"))
+    temperature: float = Field(default_factory=lambda: float(os.getenv("NVIDIA_TEMPERATURE", 0.7)))
+    max_tokens: int = Field(default_factory=lambda: int(os.getenv("NVIDIA_MAX_TOKENS", 1024)))
+    top_p: float = Field(default_factory=lambda: float(os.getenv("NVIDIA_TOP_P", 0.7)))
+    
+class GroqLLMCofig():
+    type: Literal["groq"]
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("GROQ_API_ENDPOINT", "https://api.groq.com/llm"))
+    api_key: str = Field(default_factory=lambda: os.getenv("GROQ_API_KEY", "your_api_key"))
+    model_name: str = Field(default_factory=lambda: os.getenv("GROQ_MODEL_NAME", "groq-llm"))
+    temperature: float = Field(default_factory=lambda: float(os.getenv("GROQ_TEMPERATURE", 0.7)))
+    max_tokens: int = Field(default_factory=lambda: int(os.getenv("GROQ_MAX_TOKENS", 1024)))
+    top_p: float = Field(default_factory=lambda: float(os.getenv("GROQ_TOP_P", 0.7)))
+    
+LLMConfigUnion = Annotated[
+    Union[GeminiLLMConfig, NvidiaLLMConfig, GroqLLMCofig],
+    Field(discriminator="type")
+]
