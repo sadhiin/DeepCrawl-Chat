@@ -2,6 +2,7 @@ defaults:
   - _self_
   - database: default
   - vectorstore: default
+  - llm: google
 
 
 app:

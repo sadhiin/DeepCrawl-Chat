@@ -1,8 +1,8 @@
 type: google
-api_provider: google_genai
-model_name: gemini-2.0-flash
-api_key: ${oc.env:GEMINI_API_KEY,''}
 api_endpoint: https://generativelanguage.googleapis.com/v1beta/openai/
+api_provider: google_genai
+api_key: ${oc.env:GEMINI_API_KEY,''}
+model_name: gemini-2.0-flash
 temperature: 0.5
 max_tokens: 4096
 top_p: 0.9
