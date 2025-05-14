@@ -7,7 +7,8 @@ from omegaconf import OmegaConf
 from src.deepcrawl_chat.config.schemas import (
     DatabaseConfigUnion, 
     VectorStoreConfigUnion,
-    LLMConfigUnion    
+    LLMConfigUnion,
+    NvidiaEmbeddingConfig
 )
 
 import threading
@@ -17,6 +18,7 @@ class AppConfig(BaseModel):
     database: DatabaseConfigUnion
     vectorstore: VectorStoreConfigUnion
     llm: LLMConfigUnion
+    embedding: NvidiaEmbeddingConfig
 
 # Singleton cache and lock
 _config_instance = None

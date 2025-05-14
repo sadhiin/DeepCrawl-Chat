@@ -95,7 +95,7 @@ class LLMConfig(BaseSettings):
     
 class GeminiLLMConfig(LLMConfig):
     type: Literal["google"]
-    api_endpoint: str = Field(default_factory=lambda: os.getenv("GEMINI_API_ENDPOINT", "https://generativelanguage.googleapis.com/v1beta/openai/"))
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("GEMINI_API_ENDPOINT", "https://googleapis.com/endpoint/uri/"))
     api_key: str = Field(default_factory=lambda: os.getenv("GEMINI_API_KEY", "your_api_key"))
     api_provider: str = Field(default_factory=lambda: os.getenv("GEMINI_API_PROVIDER", "google"))
     model_name: str = Field(default_factory=lambda: os.getenv("GEMINI_MODEL_NAME", "gemini-2.0-flash"))
@@ -105,7 +105,7 @@ class GeminiLLMConfig(LLMConfig):
     
 class NvidiaLLMConfig(LLMConfig):
     type : Literal["nvidia"]
-    api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/llm"))
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/endpoint/uri/"))
     api_key: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_KEY", "your_api_key"))
     api_provider: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_PROVIDER", "nvidia"))
     model_name: str = Field(default_factory=lambda: os.getenv("NVIDIA_MODEL_NAME", "nvidia-llm"))
@@ -115,7 +115,7 @@ class NvidiaLLMConfig(LLMConfig):
     
 class GroqLLMConfig(LLMConfig):
     type: Literal["groq"]
-    api_endpoint: str = Field(default_factory=lambda: os.getenv("GROQ_API_ENDPOINT", "https://api.groq.com/llm"))
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("GROQ_API_ENDPOINT", "https://api.groq.com/endpoint/uri/"))
     api_key: str = Field(default_factory=lambda: os.getenv("GROQ_API_KEY", "your_api_key"))
     api_provider: str = Field(default_factory=lambda: os.getenv("GROQ_API_PROVIDER", "groq"))
     model_name: str = Field(default_factory=lambda: os.getenv("GROQ_MODEL_NAME", "groq-llm"))
@@ -131,3 +131,25 @@ LLMConfigUnion = Annotated[
     Union[GeminiLLMConfig, NvidiaLLMConfig, GroqLLMConfig],
     Field(discriminator="type")
 ]
+
+## ------------------------------------ Base config class for embedding ------------------------------------ ##
+
+
+class EmbeddingConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+        env_file_encoding="utf-8"
+    )
+    type: str
+    
+    
+class NvidiaEmbeddingConfig(EmbeddingConfig):
+    type: Literal["nvidia"]
+    api_provider: str = 'nividia'
+    api_key: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_KEY", "your_api_key")) 
+    api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/endpoint/uri/"))
+    embedding_model: str = Field(default_factory=lambda: os.getenv("EMBEDDING_MODEL", "default_embedding_model"))
+    chunk_size: int = 5000
+    chunk_overlap: int = int(0.15*5000)
+    similarity_threshold: float = Field(default_factory=lambda: float(os.getenv("SIMILARITY_THRESHOLD", 0.7)))

@@ -3,6 +3,7 @@ defaults:
   - database: default
   - vectorstore: default
   - llm: google
+  - embedding: default
 
 
 app:

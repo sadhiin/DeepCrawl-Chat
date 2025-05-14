@@ -1,6 +1,8 @@
+type: nvidia
 api_provider: "nvidia"
-model: "nvidia/llama-3.2-nv-embedqa-1b-v2"
+embedding_model: "nvidia/llama-3.2-nv-embedqa-1b-v2"
 api_key: ${oc.env:NVIDIA_API_KEY}
-
+api_endpoint: ${oc.env:NVIDIA_API_ENDPOINT}
 chunk_size: 5000
-chunk_overlap: ${0.15*chunk_size}
+chunk_overlap: 750
+similarity_threshold: 0.7
