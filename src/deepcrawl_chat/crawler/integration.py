@@ -40,7 +40,7 @@ class CrawlRAGPipeline:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         Path(vector_store_dir).mkdir(parents=True, exist_ok=True)
 
-    async def crawl_and_index(self, url: str, max_depth: int = 3) -> str:
+    async def async_crawl_and_index(self, url: str, max_depth: int = 3) -> str:
         """
         Crawl a website and index the results.
 
@@ -73,7 +73,7 @@ class CrawlRAGPipeline:
         crawler.export_links_to_csv()
 
         # # Index the crawled results
-        # return self.index_crawl_results(crawl_path)
+        return self.index_crawl_results(crawl_path)
 
     def index_crawl_results(self, csv_path: str, url_type: str = "page") -> str:
         """
