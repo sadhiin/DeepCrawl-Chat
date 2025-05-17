@@ -1,13 +1,15 @@
+import asyncio
+import time
 from src.deepcrawl_chat.config import get_config
 from src.deepcrawl_chat.crawler.integration import CrawlRAGPipeline
 
-def main():
+async def main():
     # print(get_config())
     pipeline = CrawlRAGPipeline()
-    url = "https://google.com"
+    url = "https://www.langchain.com/"
     
     await pipeline.async_crawl_and_index(url=url, max_depth=1)
     
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
