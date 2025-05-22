@@ -2,6 +2,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 import os
 import tempfile
+import asyncio
+from src.deepcrawl_chat.core.redis import RedisPool
 
 from src.deep_crawler.integration import CrawlRAGPipeline
 
@@ -59,3 +61,11 @@ class TestCrawlRAGPipeline:
             mock_vectorstore.assert_called_once()
 
             assert result is not None
+
+@pytest.mark.asyncio
+async def test_redis_connection_and_ping():
+    redis_pool = RedisPool()
+    pool = await redis_pool.connect()
+    pong = await pool.ping()
+    assert pong is True or pong == 'PONG'
+    await redis_pool.close()

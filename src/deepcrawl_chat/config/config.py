@@ -5,10 +5,11 @@ from pydantic_settings import BaseSettings
 from hydra import initialize, compose
 from omegaconf import OmegaConf
 from src.deepcrawl_chat.config.schemas import (
-    DatabaseConfigUnion, 
+    DatabaseConfigUnion,
     VectorStoreConfigUnion,
     LLMConfigUnion,
-    NvidiaEmbeddingConfig
+    NvidiaEmbeddingConfig,
+    RedisConfig
 )
 
 import threading
@@ -19,6 +20,7 @@ class AppConfig(BaseModel):
     vectorstore: VectorStoreConfigUnion
     llm: LLMConfigUnion
     embedding: NvidiaEmbeddingConfig
+    redis: RedisConfig
 
 # Singleton cache and lock
 _config_instance = None

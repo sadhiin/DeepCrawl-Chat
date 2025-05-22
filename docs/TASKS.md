@@ -48,10 +48,10 @@
 ## Phase 2: Worker Implementation
 
 ### 4. Task Queue System
-- [ ] 4.1 Redis integration
-  - [ ] 4.1.1 Set up Redis connection
-  - [ ] 4.1.2 Implement queue management
-  - [ ] 4.1.3 Add task persistence
+- [x] 4.1 Redis integration
+  - [x] 4.1.1 Set up Redis connection
+  - [x] 4.1.2 Implement queue management
+  - [x] 4.1.3 Add task persistence
 - [ ] 4.2 Task management
   - [ ] 4.2.1 Task creation and validation
   - [ ] 4.2.2 Task distribution
@@ -198,6 +198,11 @@
      - Logging system with configurable levels
      - Error handling with error codes
      - Type definitions for common data structures
+
+4. **Redis Integration**
+   - Implemented async Redis connection pool utility in `src/deepcrawl_chat/core/redis.py` with config, logging, and error handling.
+   - Added Redis configuration schema and integrated it into the config system.
+   - Added test to verify Redis connection and ping.
 
 ### Next Steps
 

@@ -20,3 +20,10 @@ hydra:
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
+
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+  pool_size: 10

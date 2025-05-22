@@ -92,7 +92,7 @@ class LLMConfig(BaseSettings):
     temperature: float
     max_tokens: int
     top_p: float = 0.7
-    
+
 class GeminiLLMConfig(LLMConfig):
     type: Literal["google"]
     api_endpoint: str = Field(default_factory=lambda: os.getenv("GEMINI_API_ENDPOINT", "https://googleapis.com/endpoint/uri/"))
@@ -102,7 +102,7 @@ class GeminiLLMConfig(LLMConfig):
     temperature: float = Field(default_factory=lambda: float(os.getenv("GEMINI_TEMPERATURE", 0.7)))
     max_tokens: int = Field(default_factory=lambda: int(os.getenv("GEMINI_MAX_TOKENS", 1024)))
     top_p: float = Field(default_factory=lambda: float(os.getenv("GEMINI_TOP_P", 0.7)))
-    
+
 class NvidiaLLMConfig(LLMConfig):
     type : Literal["nvidia"]
     api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/endpoint/uri/"))
@@ -112,7 +112,7 @@ class NvidiaLLMConfig(LLMConfig):
     temperature: float = Field(default_factory=lambda: float(os.getenv("NVIDIA_TEMPERATURE", 0.7)))
     max_tokens: int = Field(default_factory=lambda: int(os.getenv("NVIDIA_MAX_TOKENS", 1024)))
     top_p: float = Field(default_factory=lambda: float(os.getenv("NVIDIA_TOP_P", 0.7)))
-    
+
 class GroqLLMConfig(LLMConfig):
     type: Literal["groq"]
     api_endpoint: str = Field(default_factory=lambda: os.getenv("GROQ_API_ENDPOINT", "https://api.groq.com/endpoint/uri/"))
@@ -126,7 +126,7 @@ class GroqLLMConfig(LLMConfig):
     class Config:
         arbitrary_types_allowed = True
 
-    
+
 LLMConfigUnion = Annotated[
     Union[GeminiLLMConfig, NvidiaLLMConfig, GroqLLMConfig],
     Field(discriminator="type")
@@ -142,14 +142,26 @@ class EmbeddingConfig(BaseSettings):
         env_file_encoding="utf-8"
     )
     type: str
-    
-    
+
+
 class NvidiaEmbeddingConfig(EmbeddingConfig):
     type: Literal["nvidia"]
     api_provider: str = 'nividia'
-    api_key: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_KEY", "your_api_key")) 
+    api_key: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_KEY", "your_api_key"))
     api_endpoint: str = Field(default_factory=lambda: os.getenv("NVIDIA_API_ENDPOINT", "https://api.nvidia.com/endpoint/uri/"))
     embedding_model: str = Field(default_factory=lambda: os.getenv("EMBEDDING_MODEL", "default_embedding_model"))
     chunk_size: int = 5000
     chunk_overlap: int = int(0.15*5000)
     similarity_threshold: float = Field(default_factory=lambda: float(os.getenv("SIMILARITY_THRESHOLD", 0.7)))
+
+class RedisConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+        env_file_encoding="utf-8"
+    )
+    host: str = Field(default_factory=lambda: os.getenv("REDIS_HOST", "localhost"))
+    port: int = Field(default_factory=lambda: int(os.getenv("REDIS_PORT", 6379)))
+    db: int = Field(default_factory=lambda: int(os.getenv("REDIS_DB", 0)))
+    password: str | None = Field(default_factory=lambda: os.getenv("REDIS_PASSWORD", None))
+    pool_size: int = Field(default_factory=lambda: int(os.getenv("REDIS_POOL_SIZE", 10)))
