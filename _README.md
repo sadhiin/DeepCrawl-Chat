@@ -295,5 +295,6 @@ Please ensure your code follows our coding standards and includes appropriate te
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
+https://github.com/langchain-ai/langchain/discussions/20728
 
 Built with ❤️ by [@sadhiin](https://github.com/sadhiin)

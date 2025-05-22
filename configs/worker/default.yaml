@@ -1,0 +1,34 @@
+type: distributed
+
+# Worker pool configuration
+pool:
+  crawler:
+    num_workers: ${oc.env:NUM_CRAWLER_WORKERS,4}
+    batch_size: 10
+    max_retries: 3
+    timeout: 30
+
+  processor:
+    num_workers: ${oc.env:NUM_PROCESSOR_WORKERS,2}
+    batch_size: 20
+    chunk_size: 5000
+    chunk_overlap: 750
+
+  embedding:
+    num_workers: ${oc.env:NUM_EMBEDDING_WORKERS,2}
+    batch_size: 50
+    max_retries: 2
+
+# Queue configuration
+queue:
+  type: redis
+  url: ${oc.env:REDIS_URL,redis://localhost:6379/0}
+  max_size: 10000
+  timeout: 60
+
+# Task configuration
+task:
+  max_retries: 3
+  retry_delay: 5
+  timeout: 300
+  cleanup_after: 86400  # 24 hours

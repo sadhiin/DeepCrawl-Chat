@@ -4,12 +4,15 @@ defaults:
   - vectorstore: default
   - llm: google
   - embedding: default
+  - worker: default
 
 
 app:
   name: "DeepCrawl Chat"
   version: "1.0.1"
   log_dir: "logs"
+  environment: ${oc.env:ENVIRONMENT,development}
+  debug: ${oc.env:DEBUG,false}
 
 hydra:
   run:
