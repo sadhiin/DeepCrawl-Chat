@@ -41,6 +41,9 @@ class ErrorCode(str, Enum):
     CONNECTION_ERROR = "CONNECTION_ERROR"
     QUERY_ERROR = "QUERY_ERROR"
 
+    # Queue errors
+    QUEUE_ERROR = "QUEUE_ERROR"
+
 class DeepCrawlError(Exception):
     """Base exception class for DeepCrawl application."""
 

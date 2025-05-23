@@ -204,6 +204,12 @@
    - Added Redis configuration schema and integrated it into the config system.
    - Added test to verify Redis connection and ping.
 
+5. **Queue Management (Phase 2)**
+   - Implemented `QueueManager` in `src/deepcrawl_chat/queue/manager.py` for Redis-based task queuing (enqueue, dequeue, get size).
+   - Defined `Task` schema in `src/deepcrawl_chat/queue/schemas.py`.
+   - Added `QUEUE_ERROR` to `ErrorCode` enum.
+   - Included comprehensive tests for `QueueManager` in `tests/queue/test_manager.py`.
+
 ### Next Steps
 
 #### Task Queue System (Phase 2)
