@@ -210,13 +210,26 @@
    - Added `QUEUE_ERROR` to `ErrorCode` enum.
    - Included comprehensive tests for `QueueManager` in `tests/queue/test_manager.py`.
 
+6. **Task Persistence and Recovery (Phase 2)**
+   - Updated `Task` schema (`src/deepcrawl_chat/queue/schemas.py`) with `attempts` and `error_message` fields.
+   - Enhanced `QueueManager` (`src/deepcrawl_chat/queue/manager.py`):
+     - Manages separate pending, processing, and failed task lists for each queue.
+     - `dequeue_task` now atomically moves tasks from pending to processing using `BRPOPLPUSH`.
+     - Added `ack_task` to remove tasks from processing upon success.
+     - Added `fail_task` to increment attempts, and move to failed list (if max retries exceeded) or back to pending.
+     - Implemented `requeue_all_processing_tasks` for recovering tasks from processing (e.g., after worker crash), with retry limits.
+     - Added methods for managing failed tasks (`get_failed_tasks`, `delete_failed_tasks`).
+     - Added `get_all_queue_sizes` for better monitoring.
+     - Configurable `max_retries` for tasks.
+   - Updated tests in `tests/queue/test_manager.py` to cover persistence, acknowledgments, failures, retries, and recovery mechanisms.
+
 ### Next Steps
 
 #### Task Queue System (Phase 2)
 1. **Redis Integration**
    - Set up Redis connection pool
    - Implement queue management system
-   - Add task persistence layer
+   - [x] Add task persistence layer
 
 2. **Task Management**
    - Create task creation and validation system
@@ -280,3 +293,11 @@ The implementation will follow the established patterns of:
 - Comprehensive error handling
 - Type safety
 - Proper logging and monitoring
+
+The task persistence and recovery mechanisms for the Redis queue are now largely implemented.
+The `QueueManager` has been significantly enhanced with features for reliable task handling,
+including separate lists for pending, processing, and failed tasks, atomic operations for
+dequeuing, and clear mechanisms for task acknowledgment, failure handling (with retries),
+and recovery of orphaned tasks.
+The `Task` schema now supports tracking attempts and errors.
+Comprehensive tests for these new features have been added.

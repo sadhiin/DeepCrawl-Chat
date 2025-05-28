@@ -6,3 +6,5 @@ class Task(BaseModel):
     task_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     task_type: str
     payload: Dict[str, Any]
+    attempts: int = Field(default=0)
+    error_message: str | None = Field(default=None)
