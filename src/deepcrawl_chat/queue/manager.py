@@ -35,14 +35,14 @@ class QueueManager:
             f"{base_queue_name}{self.FAILED_SUFFIX}",
         )
 
-    async def enqueue_task(self, queue_name: str, task_payload: Dict[str, Any], task_type: str = "generic") -> str:
+    async def enqueue_task(self, queue_name: str, task: Task) -> str:
         """
-        Enqueues a task to the specified base Redis queue's pending list.
+        Enqueues a pre-constructed Task object to the specified base Redis queue's pending list.
+        The Task object should have its payload validated by the caller.
 
         Args:
             queue_name: The base name of the queue.
-            task_payload: The payload for the task.
-            task_type: The type of the task.
+            task: The Task object to enqueue.
 
         Returns:
             The ID of the enqueued task.
@@ -51,14 +51,14 @@ class QueueManager:
             DeepCrawlError: If enqueuing fails.
         """
         pending_queue, _, _ = self._get_queue_names(queue_name)
-        task = Task(task_type=task_type, payload=task_payload)
+        # Task object is now passed directly
         try:
             await self.redis.lpush(pending_queue, task.model_dump_json())
             logger.info(f"Enqueued task {task.task_id} of type '{task.task_type}' to queue '{pending_queue}'")
             return task.task_id
         except Exception as e:
             logger.error(f"Error enqueuing task {task.task_id} to '{pending_queue}': {e}", exc_info=True)
-            raise DeepCrawlError(f"Failed to enqueue task to '{pending_queue}': {e}", ErrorCode.QUEUE_ERROR)
+            raise DeepCrawlError(f"Failed to enqueue task {task.task_id} to '{pending_queue}': {e}", ErrorCode.QUEUE_ERROR)
 
     async def dequeue_task(self, queue_name: str, timeout: int = 5) -> Optional[Task]:
         """

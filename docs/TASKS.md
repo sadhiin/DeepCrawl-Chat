@@ -55,7 +55,6 @@
 - [ ] 4.2 Task management
   - [ ] 4.2.1 Task creation and validation
   - [ ] 4.2.2 Task distribution
-  - [ ] 4.2.3 Task status tracking
 - [ ] 4.3 Queue monitoring
   - [ ] 4.3.1 Queue metrics
   - [ ] 4.3.2 Health checks
@@ -223,16 +222,22 @@
      - Configurable `max_retries` for tasks.
    - Updated tests in `tests/queue/test_manager.py` to cover persistence, acknowledgments, failures, retries, and recovery mechanisms.
 
+7. **Task Creation and Validation (Phase 2)**
+   - Defined specific Pydantic models for task payloads (`CrawlURLPayload`, `ProcessContentPayload`) in `src/deepcrawl_chat/queue/schemas.py` to ensure structured and validated task-specific data.
+   - Modified `QueueManager.enqueue_task` in `src/deepcrawl_chat/queue/manager.py` to accept a pre-constructed `Task` object, shifting task creation and initial validation responsibility to the caller.
+   - Updated existing calls to `enqueue_task` in tests (`tests/queue/test_manager.py`) to conform to the new signature.
+   - Added new unit tests in `tests/queue/test_schemas.py` for the validation capabilities of the new task payload schemas.
+
 ### Next Steps
 
 #### Task Queue System (Phase 2)
 1. **Redis Integration**
-   - Set up Redis connection pool
-   - Implement queue management system
+   - [x] Set up Redis connection pool
+   - [x] Implement queue management system
    - [x] Add task persistence layer
 
 2. **Task Management**
-   - Create task creation and validation system
+   - [x] Create task creation and validation system
    - Implement task distribution mechanism
    - Add task status tracking
 
@@ -283,9 +288,9 @@
 
 ### Next Implementation Focus
 The next phase will focus on implementing the task queue system using Redis. This includes:
-1. Setting up Redis connection and connection pooling
-2. Implementing queue management with proper error handling
-3. Adding task persistence and recovery mechanisms
+1. [x] Setting up Redis connection and connection pooling
+2. [x] Implementing queue management with proper error handling
+3. [x] Adding task persistence and recovery mechanisms
 4. Creating monitoring and health check systems
 
 The implementation will follow the established patterns of:

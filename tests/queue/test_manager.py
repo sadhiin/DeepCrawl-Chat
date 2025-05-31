@@ -3,7 +3,7 @@ import asyncio
 import json # Added for manipulating task data directly
 from src.deepcrawl_chat.core.redis import RedisPool
 from src.deepcrawl_chat.queue.manager import QueueManager
-from src.deepcrawl_chat.queue.schemas import Task
+from src.deepcrawl_chat.queue.schemas import Task, CrawlURLPayload
 from src.deepcrawl_chat.core.utils import DeepCrawlError, ErrorCode
 import logging # Added for spying on logger
 
@@ -72,12 +72,14 @@ async def test_enqueue_dequeue_task(queue_manager: QueueManager):
     queue_name = f"{BASE_TEST_QUEUE_NAME}_enqueue_dequeue"
     await cleanup_queues(queue_manager, queue_name)
 
-    task_payload = {"url": "http://example.com", "depth": 2}
-    task_type = "crawl"
+    task_payload_data = {"url": "http://example.com", "depth": 2, "force_recrawl": False}
+    crawl_payload = CrawlURLPayload(**task_payload_data)
+    task_to_enqueue = Task(task_type="CRAWL_URL", payload=crawl_payload.model_dump())
 
     # Enqueue
-    task_id = await queue_manager.enqueue_task(queue_name, task_payload, task_type)
+    task_id = await queue_manager.enqueue_task(queue_name, task_to_enqueue)
     assert isinstance(task_id, str)
+    assert task_id == task_to_enqueue.task_id
 
     # Check pending queue size
     size = await queue_manager.get_queue_size(queue_name, queue_type="pending")
@@ -91,8 +93,8 @@ async def test_enqueue_dequeue_task(queue_manager: QueueManager):
     assert dequeued_task is not None
     assert isinstance(dequeued_task, Task)
     assert dequeued_task.task_id == task_id
-    assert dequeued_task.task_type == task_type
-    assert dequeued_task.payload == task_payload
+    assert dequeued_task.task_type == task_to_enqueue.task_type
+    assert dequeued_task.payload == task_to_enqueue.payload
     assert dequeued_task.attempts == 0 # Initial dequeue
 
     # Check queue sizes after dequeue (task moves to processing)
@@ -131,8 +133,13 @@ async def test_get_queue_sizes(queue_manager: QueueManager):
     assert await queue_manager.get_queue_size(queue_name, "failed") == 0
 
     # Enqueue a few tasks
-    task1_id = await queue_manager.enqueue_task(queue_name, {"data": "task1"})
-    await queue_manager.enqueue_task(queue_name, {"data": "task2"})
+    task1_payload = CrawlURLPayload(url="http://example.com/1", depth=0)
+    task1_obj = Task(task_type="CRAWL_URL", payload=task1_payload.model_dump())
+    task1_id = await queue_manager.enqueue_task(queue_name, task1_obj)
+
+    task2_payload = CrawlURLPayload(url="http://example.com/2", depth=0)
+    task2_obj = Task(task_type="CRAWL_URL", payload=task2_payload.model_dump())
+    await queue_manager.enqueue_task(queue_name, task2_obj)
 
     current_sizes = await queue_manager.get_all_queue_sizes(queue_name)
     assert current_sizes == {"pending": 2, "processing": 0, "failed": 0}
@@ -156,8 +163,13 @@ async def test_enqueue_failure_simulated(queue_manager: QueueManager, mocker):
     queue_name = f"{BASE_TEST_QUEUE_NAME}_enqueue_fail"
     await cleanup_queues(queue_manager, queue_name)
     mocker.patch.object(queue_manager.redis, 'lpush', side_effect=Exception("Simulated Redis Error"))
+
+    task_payload_data = {"url": "http://example.com/fail", "depth": 0, "force_recrawl": False}
+    crawl_payload = CrawlURLPayload(**task_payload_data)
+    task_to_enqueue = Task(task_type="CRAWL_URL", payload=crawl_payload.model_dump())
+
     with pytest.raises(DeepCrawlError) as excinfo:
-        await queue_manager.enqueue_task(queue_name, {"data": "test"})
+        await queue_manager.enqueue_task(queue_name, task_to_enqueue)
     assert excinfo.value.error_code == ErrorCode.QUEUE_ERROR
     await cleanup_queues(queue_manager, queue_name)
 
@@ -214,7 +226,11 @@ async def test_ack_task_success_and_not_found(queue_manager: QueueManager):
     queue_name = f"{BASE_TEST_QUEUE_NAME}_ack"
     await cleanup_queues(queue_manager, queue_name)
 
-    task_id = await queue_manager.enqueue_task(queue_name, {"data": "ack_test"})
+    task_payload_data = {"url": "http://example.com/ack", "depth": 0}
+    ack_payload = CrawlURLPayload(**task_payload_data)
+    task_obj_ack = Task(task_type="CRAWL_URL", payload=ack_payload.model_dump())
+    task_id = await queue_manager.enqueue_task(queue_name, task_obj_ack)
+
     task = await queue_manager.dequeue_task(queue_name, timeout=1)
     assert task is not None
     assert await queue_manager.get_queue_size(queue_name, "processing") == 1
@@ -234,7 +250,9 @@ async def test_fail_task_retry_and_max_retries(queue_manager: QueueManager):
     await cleanup_queues(queue_manager, queue_name)
     await queue_manager.set_max_retries(2) # Test with 2 retries
 
-    task_id = await queue_manager.enqueue_task(queue_name, {"data": "retry_test"})
+    fail_payload = CrawlURLPayload(url="http://example.com/fail_retry", depth=0)
+    task_obj_fail = Task(task_type="CRAWL_URL", payload=fail_payload.model_dump())
+    task_id = await queue_manager.enqueue_task(queue_name, task_obj_fail)
 
     # --- Attempt 1 (initial dequeue) ---
     task = await queue_manager.dequeue_task(queue_name, timeout=1)
@@ -289,8 +307,13 @@ async def test_requeue_all_processing_tasks(queue_manager: QueueManager):
     await queue_manager.set_max_retries(1) # Max 1 retry (so 2 total processing attempts)
 
     # Enqueue and dequeue two tasks to simulate them being processed
-    task1_id = await queue_manager.enqueue_task(queue_name, {"data": "requeue1"})
-    task2_id = await queue_manager.enqueue_task(queue_name, {"data": "requeue2"})
+    requeue1_payload = CrawlURLPayload(url="http://example.com/requeue1", depth=0)
+    task1_obj_requeue = Task(task_type="CRAWL_URL", payload=requeue1_payload.model_dump())
+    task1_id = await queue_manager.enqueue_task(queue_name, task1_obj_requeue)
+
+    requeue2_payload = CrawlURLPayload(url="http://example.com/requeue2", depth=0)
+    task2_obj_requeue = Task(task_type="CRAWL_URL", payload=requeue2_payload.model_dump())
+    task2_id = await queue_manager.enqueue_task(queue_name, task2_obj_requeue)
 
     task1 = await queue_manager.dequeue_task(queue_name, timeout=1) # task1 to processing
     task2 = await queue_manager.dequeue_task(queue_name, timeout=1) # task2 to processing
@@ -312,7 +335,7 @@ async def test_requeue_all_processing_tasks(queue_manager: QueueManager):
 
     # Check attempts (original was 0, requeue adds 1)
     # Order might vary, so check by payload or ensure IDs match
-    if task1_requeued.payload["data"] == "requeue1":
+    if CrawlURLPayload(**task1_requeued.payload).url == "http://example.com/requeue1":
         assert task1_requeued.attempts == 1
         assert task2_requeued.attempts == 1
     else: # task2 came first
@@ -352,8 +375,9 @@ async def test_requeue_malformed_task_in_processing(queue_manager: QueueManager,
     # Manually put a malformed task in the processing queue
     await queue_manager.redis.lpush(processing_q, malformed_json)
     # Add a valid task as well to ensure it's processed correctly
-    valid_task_payload = {"data":"valid_requeue"}
-    valid_task = Task(task_type="test", payload=valid_task_payload)
+    valid_task_payload_dict = {"url":"http://example.com/valid_requeue", "depth": 0}
+    valid_crawl_payload = CrawlURLPayload(**valid_task_payload_dict)
+    valid_task = Task(task_type="CRAWL_URL", payload=valid_crawl_payload.model_dump())
     await queue_manager.redis.lpush(processing_q, valid_task.model_dump_json())
 
     assert await queue_manager.redis.llen(processing_q) == 2
@@ -394,7 +418,7 @@ async def test_requeue_malformed_task_in_processing(queue_manager: QueueManager,
     pending_tasks = await queue_manager.redis.lrange(f"{queue_name}{QueueManager.PENDING_SUFFIX}", 0, -1)
     assert len(pending_tasks) == 1
     pending_task_obj = Task.model_validate_json(pending_tasks[0])
-    assert pending_task_obj.payload == valid_task_payload
+    assert pending_task_obj.payload == valid_crawl_payload.model_dump() # Compare dicts
     assert pending_task_obj.attempts == 1 # Incremented by requeue
 
     await cleanup_queues(queue_manager, queue_name)
