@@ -3,7 +3,7 @@ import asyncio
 import json # Added for manipulating task data directly
 from src.deepcrawl_chat.core.redis import RedisPool
 from src.deepcrawl_chat.queue.manager import QueueManager
-from src.deepcrawl_chat.queue.schemas import Task, CrawlURLPayload
+from src.deepcrawl_chat.queue.schemas import Task, CrawlURLPayload, TaskPriority
 from src.deepcrawl_chat.core.utils import DeepCrawlError, ErrorCode
 import logging # Added for spying on logger
 
@@ -74,7 +74,7 @@ async def test_enqueue_dequeue_task(queue_manager: QueueManager):
 
     task_payload_data = {"url": "http://example.com", "depth": 2, "force_recrawl": False}
     crawl_payload = CrawlURLPayload(**task_payload_data)
-    task_to_enqueue = Task(task_type="CRAWL_URL", payload=crawl_payload.model_dump())
+    task_to_enqueue = Task(task_type="CRAWL_URL", payload=crawl_payload.model_dump(), priority=TaskPriority.HIGH)
 
     # Enqueue
     task_id = await queue_manager.enqueue_task(queue_name, task_to_enqueue)
@@ -95,6 +95,7 @@ async def test_enqueue_dequeue_task(queue_manager: QueueManager):
     assert dequeued_task.task_id == task_id
     assert dequeued_task.task_type == task_to_enqueue.task_type
     assert dequeued_task.payload == task_to_enqueue.payload
+    assert dequeued_task.priority == task_to_enqueue.priority
     assert dequeued_task.attempts == 0 # Initial dequeue
 
     # Check queue sizes after dequeue (task moves to processing)

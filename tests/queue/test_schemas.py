@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from src.deepcrawl_chat.queue.schemas import Task, CrawlURLPayload, ProcessContentPayload
+from src.deepcrawl_chat.queue.schemas import Task, CrawlURLPayload, ProcessContentPayload, TaskPriority
 
 def test_task_creation_default_id_attempts():
     payload_data = {"key": "value"}
@@ -10,6 +10,7 @@ def test_task_creation_default_id_attempts():
     assert len(task.task_id) > 0 # Basic check for UUID-like string
     assert task.task_type == "TEST_TYPE"
     assert task.payload == payload_data
+    assert task.priority == TaskPriority.NORMAL  # Default priority
     assert task.attempts == 0
     assert task.error_message is None
 
@@ -18,15 +19,22 @@ def test_task_creation_custom_values():
         task_id="custom_id_123",
         task_type="CUSTOM_TYPE",
         payload={"info": "details"},
+        priority=TaskPriority.HIGH,
         attempts=2,
         error_message="Previous error"
     )
     assert task.task_id == "custom_id_123"
     assert task.task_type == "CUSTOM_TYPE"
     assert task.payload == {"info": "details"}
+    assert task.priority == TaskPriority.HIGH
     assert task.attempts == 2
     assert task.error_message == "Previous error"
 
+def test_task_priority_enum():
+    """Test that TaskPriority enum values work correctly."""
+    for priority in TaskPriority:
+        task = Task(task_type="TEST", payload={}, priority=priority)
+        assert task.priority == priority
 
 # --- Tests for CrawlURLPayload ---
 
@@ -92,8 +100,9 @@ def test_process_content_payload_invalid_url():
 
 def test_task_with_crawl_payload():
     crawl_payload_data = CrawlURLPayload(url="http://test.com", depth=3)
-    task = Task(task_type="CRAWL", payload=crawl_payload_data.model_dump())
+    task = Task(task_type="CRAWL", payload=crawl_payload_data.model_dump(), priority=TaskPriority.HIGH)
     assert task.task_type == "CRAWL"
+    assert task.priority == TaskPriority.HIGH
     assert task.payload["url"] == str(crawl_payload_data.url)
     assert task.payload["depth"] == 3
     # Re-validate payload from task to ensure it's still valid
@@ -106,8 +115,9 @@ def test_task_with_process_payload():
         raw_content_path="s3://bucket/item.dat",
         source_url="http://origin.site/article/001"
     )
-    task = Task(task_type="PROCESS", payload=process_payload_data.model_dump())
+    task = Task(task_type="PROCESS", payload=process_payload_data.model_dump(), priority=TaskPriority.URGENT)
     assert task.task_type == "PROCESS"
+    assert task.priority == TaskPriority.URGENT
     assert task.payload["document_id"] == "proc_id_001"
     # Re-validate
     validated_payload_from_task = ProcessContentPayload(**task.payload)

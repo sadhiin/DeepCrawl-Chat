@@ -52,11 +52,12 @@
   - [x] 4.1.1 Set up Redis connection
   - [x] 4.1.2 Implement queue management
   - [x] 4.1.3 Add task persistence
-- [ ] 4.2 Task management
-  - [ ] 4.2.1 Task creation and validation
-  - [ ] 4.2.2 Task distribution
-- [ ] 4.3 Queue monitoring
-  - [ ] 4.3.1 Queue metrics
+- [x] 4.2 Task management
+  - [x] 4.2.1 Task creation and validation
+  - [x] 4.2.2 Task distribution
+  - [x] 4.2.3 Task status tracking
+- [x] 4.3 Queue monitoring
+  - [x] 4.3.1 Queue metrics
   - [ ] 4.3.2 Health checks
   - [ ] 4.3.3 Error handling
 
@@ -228,6 +229,68 @@
    - Updated existing calls to `enqueue_task` in tests (`tests/queue/test_manager.py`) to conform to the new signature.
    - Added new unit tests in `tests/queue/test_schemas.py` for the validation capabilities of the new task payload schemas.
 
+8. **Task Distribution Mechanism (Phase 2)**
+   - Added `TaskPriority` enum and priority field to the `Task` model in `src/deepcrawl_chat/queue/schemas.py` for priority-based distribution.
+   - Implemented comprehensive task distribution system in `src/deepcrawl_chat/queue/distributor.py`:
+     - `TaskDistributor` class for managing task distribution to workers
+     - `WorkerInfo` dataclass for tracking worker state, load, and capabilities
+     - Multiple distribution strategies: Round-robin, Least loaded, Priority-first, Worker type-based
+     - Worker registration, heartbeat tracking, and automatic cleanup of inactive workers
+     - Integration with `QueueManager` for seamless task dequeuing and completion handling
+   - Added comprehensive tests in `tests/queue/test_distributor.py` covering all distribution strategies and worker management features.
+   - Updated existing tests to work with the new Task priority field.
+
+9. **Task Status Tracking System (Phase 2)**
+   - Enhanced `Task` schema in `src/deepcrawl_chat/queue/schemas.py` with comprehensive status tracking:
+     - Added `TaskStatus` enum with states: PENDING, QUEUED, ASSIGNED, PROCESSING, COMPLETED, FAILED, CANCELLED, RETRYING, PAUSED, TIMEOUT
+     - Added `TaskProgress` model for tracking progress with percentage, steps, and processed items
+     - Added `TaskStatusHistory` model for tracking status change history
+     - Enhanced `Task` model with status fields: status, timestamps (created_at, updated_at, started_at, completed_at), assigned_worker_id, progress, timeout configuration
+     - Added utility methods for status updates and progress tracking
+   - Implemented comprehensive `TaskStatusTracker` class in `src/deepcrawl_chat/queue/status_tracker.py`:
+     - Redis-based status persistence with atomic operations
+     - Status change history tracking with detailed logs
+     - Progress monitoring with percentage and step tracking
+     - Worker-task mapping for load balancing
+     - Timeout tracking with automatic cleanup
+     - Status indexes for efficient querying
+     - Cleanup mechanisms for old completed tasks
+   - Integrated status tracking into `QueueManager` (`src/deepcrawl_chat/queue/manager.py`):
+     - Automatic status updates during enqueue, dequeue, ack, and fail operations
+     - Worker ID tracking for all operations
+     - Enhanced retry logic with status tracking
+     - Task cancellation with proper status updates
+   - Updated `TaskDistributor` to use status tracking for better task assignment and completion handling
+   - Added comprehensive tests in `tests/queue/test_status_tracker.py` covering all status tracking functionality
+   - Updated package exports to include all new status tracking classes
+
+10. **Queue Metrics System (Phase 2)**
+   - Implemented comprehensive metrics collection system in `src/deepcrawl_chat/queue/metrics.py`:
+     - `QueueMetrics` dataclass for tracking queue-level metrics: pending/processing/failed/completed counts, throughput, timing, error rates
+     - `WorkerMetrics` dataclass for worker-level metrics: load, performance, uptime, task completion rates
+     - `SystemMetrics` dataclass for system-wide metrics: worker counts, system load, Redis resource usage, overall throughput
+     - `MetricsCollector` class for collecting, aggregating, and storing metrics
+   - Features of the MetricsCollector:
+     - Redis-based metrics persistence with configurable retention (24 hours default)
+     - In-memory metrics history for fast aggregation (last 100 samples)
+     - Real-time throughput calculation and performance tracking
+     - Worker performance monitoring with exponential moving averages
+     - Task timing analysis with event tracking (enqueued, started, completed, failed)
+     - System resource monitoring including Redis memory usage and connections
+     - Metrics aggregation over configurable time windows
+     - Comprehensive error handling with graceful degradation
+   - Integration capabilities:
+     - Works with existing QueueManager and TaskDistributor
+     - Automatic metrics collection during queue operations
+     - Support for status tracker integration for enhanced metrics
+     - Configurable collection intervals and retention policies
+   - Added comprehensive tests in `tests/queue/test_metrics.py` covering all metrics functionality:
+     - Metrics collection for queues, workers, and system
+     - Data aggregation and summary generation
+     - Error handling and resilience
+     - Redis storage and retrieval operations
+   - Updated package exports to include all metrics classes
+
 ### Next Steps
 
 #### Task Queue System (Phase 2)
@@ -238,8 +301,8 @@
 
 2. **Task Management**
    - [x] Create task creation and validation system
-   - Implement task distribution mechanism
-   - Add task status tracking
+   - [x] Implement task distribution mechanism
+   - [x] Add task status tracking
 
 3. **Queue Monitoring**
    - Implement queue metrics collection
