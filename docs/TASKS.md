@@ -58,7 +58,7 @@
   - [x] 4.2.3 Task status tracking
 - [x] 4.3 Queue monitoring
   - [x] 4.3.1 Queue metrics
-  - [ ] 4.3.2 Health checks
+  - [x] 4.3.2 Health checks
   - [ ] 4.3.3 Error handling
 
 ### 5. Worker Implementation
@@ -290,6 +290,42 @@
      - Error handling and resilience
      - Redis storage and retrieval operations
    - Updated package exports to include all metrics classes
+
+11. **Health Check System (Phase 2)**
+   - Implemented comprehensive health monitoring system in `src/deepcrawl_chat/queue/health.py`:
+     - `HealthStatus` enum with four levels: HEALTHY, DEGRADED, UNHEALTHY, CRITICAL
+     - `HealthCheckResult` dataclass for individual health check results with timing and details
+     - `SystemHealth` dataclass for overall system health status with history tracking
+     - `HealthChecker` class for performing health checks across all queue infrastructure components
+     - `HealthMonitor` class for continuous health monitoring service
+   - Features of the HealthChecker:
+     - Redis connectivity and performance monitoring (ping, read/write operations, response time)
+     - Redis memory usage monitoring with configurable thresholds (70%, 80%, 90%)
+     - Queue operations health (task counts, pending/processing/failed ratios)
+     - Worker health monitoring (active worker count, load distribution, availability)
+     - Task processing health (stuck tasks, completion rates, timeout detection)
+     - System resource monitoring (Redis connection count, resource utilization)
+     - Failure count tracking with configurable thresholds for status escalation
+     - Health history tracking with configurable retention (last 100 checks)
+     - Configurable check intervals and severity thresholds
+   - Health monitoring capabilities:
+     - Continuous background health monitoring with async task management
+     - On-demand health checks for immediate status assessment
+     - Comprehensive logging with appropriate levels based on health status
+     - Graceful degradation when components are not configured
+     - Integration with all existing queue system components (optional dependencies)
+   - Health status determination logic:
+     - Critical: Any critical component failure or Redis connectivity issues
+     - Unhealthy: Multiple component failures or severe resource constraints
+     - Degraded: Single component issues or elevated resource usage
+     - Healthy: All components operating within normal parameters
+   - Added comprehensive tests in `tests/queue/test_health.py` covering:
+     - Individual health check functions for all monitored components
+     - Health status determination logic and thresholds
+     - Continuous monitoring service lifecycle
+     - Error handling and resilience testing
+     - Integration testing with mock components
+   - Updated package exports to include all health monitoring classes
 
 ### Next Steps
 
