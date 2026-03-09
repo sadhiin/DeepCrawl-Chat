@@ -41,7 +41,7 @@ class CrawlResultLoader:
             logger.info(f"Loaded {len(df)} entries from {self.csv_path}")
         except Exception as e:
             logger.error(f"Error loading CSV file {self.csv_path}: {e}")
-            return []
+            raise
 
         # Filter for the desired URL type
         filtered_df = df[df['Type'] == self.url_type]
