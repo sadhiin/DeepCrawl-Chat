@@ -1,25 +1,18 @@
 from src.deepcrawl_chat.utils.logging import logger
-from langchain_community.document_loaders import UnstructuredURLLoader, WebBaseLoader
-from src.deepcrawl_chat.config.settings import settings
+from typing import List, Optional, Dict, Any
+from langchain_community.document_loaders import WebBaseLoader
+from src.deepcrawl_chat.config.config import settings
 
 class DocumentLoader:
     def __init__(self, loader_type=settings.DOCUMENT_LOADER):
         self.loader_type = loader_type
-
-    def load_from_urls(self, urls, max_urls=None):
-        if not urls:
-            raise ValueError("No URLs provided")
-
-        urls_to_process = urls[:max_urls] if max_urls else urls
-
+        
+    def load_from_urls(self, urls: List[str]) -> List[Any]:
+        """Load documents from a list of URLs"""
+        logger.info(f"Loading documents from {len(urls)} URLs using {self.loader_type}")
+        
         try:
-            if self.loader_type == "unstructured":
-                loader = UnstructuredURLLoader(urls_to_process)
-            elif self.loader_type == "web":
-                loader = WebBaseLoader(urls_to_process)
-            else:
-                raise ValueError(f"Unsupported loader type: {self.loader_type}")
-
+            loader = WebBaseLoader(urls)
             return loader.load()
         except Exception as e:
             # Log the error with proper context

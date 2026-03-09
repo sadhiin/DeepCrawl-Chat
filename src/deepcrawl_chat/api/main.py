@@ -5,6 +5,7 @@ from typing import List
 from src.deepcrawl_chat.data_processing.loaders import DocumentLoader
 from src.deepcrawl_chat.embeddings.models import get_embeddings_model
 from src.deepcrawl_chat.vectorstores.faiss_store import get_or_create_vectorstore
+from src.deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
 from src.deepcrawl_chat.chains.retrieval import create_chat_chain
 
 app = FastAPI(title="DeepCrawl Chat API")
@@ -20,11 +21,6 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     try:
-        from src.deepcrawl_chat.embeddings.models import get_embeddings_model
-        from src.deepcrawl_chat.chains.retrieval import create_chat_chain
-        from src.deepcrawl_chat.vectorstores.faiss_store import get_or_create_vectorstore
-        from src.deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
-
         vectorstore = None
 
         if request.urls:
@@ -47,5 +43,7 @@ async def chat_endpoint(request: ChatRequest):
             answer=response['answer'],
             sources=[doc.metadata.get('source', '') for doc in response.get('context', [])]
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

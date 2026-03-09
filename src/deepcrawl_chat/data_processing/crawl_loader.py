@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import List, Optional, Dict, Any
 from langchain_community.document_loaders import WebBaseLoader
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
@@ -41,7 +41,7 @@ class CrawlResultLoader:
             logger.info(f"Loaded {len(df)} entries from {self.csv_path}")
         except Exception as e:
             logger.error(f"Error loading CSV file {self.csv_path}: {e}")
-            return []
+            raise
 
         # Filter for the desired URL type
         filtered_df = df[df['Type'] == self.url_type]
