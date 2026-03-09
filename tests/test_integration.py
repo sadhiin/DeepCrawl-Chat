@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import os
 import tempfile
 
-from src.deep_crawler.integration import CrawlRAGPipeline
+from src.deepcrawl_chat.crawler.integration import CrawlRAGPipeline
 
 class TestCrawlRAGPipeline:
 
@@ -25,10 +25,10 @@ class TestCrawlRAGPipeline:
         os.rmdir("test_output")
         os.rmdir("test_vectors")
 
-    @patch('src.deep_crawler.integration.CrawlResultLoader')
-    @patch('src.deep_crawler.integration.TextSplitter')
-    @patch('src.deep_crawler.integration.get_embeddings_model')
-    @patch('src.deep_crawler.integration.get_or_create_vectorstore')
+    @patch('src.deepcrawl_chat.crawler.integration.CrawlResultLoader')
+    @patch('src.deepcrawl_chat.crawler.integration.DeepCrawlTextSplitter')
+    @patch('src.deepcrawl_chat.crawler.integration.get_embeddings_model')
+    @patch('src.deepcrawl_chat.crawler.integration.get_or_create_vectorstore')
     def test_index_crawl_results(self, mock_vectorstore, mock_embeddings,
                                  mock_splitter, mock_loader, test_csv_file):
         """Test indexing crawl results."""

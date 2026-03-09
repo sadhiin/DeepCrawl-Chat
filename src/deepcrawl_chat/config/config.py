@@ -1,38 +1,23 @@
-from dataclasses import dataclass
-from typing import Any, Dict
-from pydantic import TypeAdapter
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+from src.deepcrawl_chat.config.schemas import PostgresConfig, FaissConfig
 
-from pydantic_settings import BaseSettings
+class AppConfig(BaseSettings):
+    # This uses the environment variables (e.g. POSTGRES_URL) but falls back to default schema config 
+    database: PostgresConfig = Field(default_factory=lambda: PostgresConfig(type="postgres"))
+    vector_store: FaissConfig = Field(default_factory=lambda: FaissConfig(type="faiss"))
+    DOCUMENT_LOADER: str = "WebBaseLoader"
 
-from hydra import initialize, compose
-from hydra.core.config_store import ConfigStore
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
-from src.deepcrawl_chat.config.schemas import DatabaseConfigUnion, VectorStoreConfigUnion
+def config_setting() -> AppConfig:
+    app_config = AppConfig()
+    print("Database connection string:", app_config.database.get_connection_string())
+    print("Vector store info:", app_config.vector_store.get_store())
+    return app_config
 
-@dataclass
-class AppConfigHydra:
-    database: Dict[str, Any]
-    vector_store: Dict[str, Any]
-
-cs = ConfigStore.instance()
-cs.store(name="app_config", node=AppConfigHydra)
-
-def config_setting():
-    with initialize(config_path="../../../configs", version_base='1.2'):
-        cfg = compose(config_name="config")
-
-        db_config = TypeAdapter(DatabaseConfigUnion).validate_python(cfg.database)  # Use TypeAdapter
-        vs_config = TypeAdapter(VectorStoreConfigUnion).validate_python(cfg.vectorstore)  # Use TypeAdapter
-
-        class AppConfig(BaseSettings):
-            database: DatabaseConfigUnion
-            vector_store: VectorStoreConfigUnion
-
-        app_config = AppConfig(database=db_config, vector_store=vs_config)
-
-        print("Database connection string:", app_config.database.get_connection_string())
-        print("Vector store info:", app_config.vector_store.get_store())
-
-        return app_config
-
-setting = config_setting()
+settings = config_setting()

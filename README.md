@@ -32,8 +32,8 @@ DeepCrawl-Chat is an intelligent web crawling and retrieval augmented generation
 
 ### Prerequisites
 
-- Python 3.11+ < 3.12.9
-- pip (Python package installer)
+- Python 3.12+ (managed by `uv`)
+- `uv` (Fast Python package and project manager)
 
 ### Setup
 
@@ -43,18 +43,12 @@ git clone https://github.com/sadhiin/DeepCrawl-Chat.git
 cd DeepCrawl-Chat
 ```
 
-2. Create and activate a virtual environment:
+2. Sync the environment and install dependencies using `uv`:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+uv sync
 ```
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Set up environment variables:
+3. Set up environment variables:
 ```bash
 cp .env.example .env
 ```
@@ -71,19 +65,19 @@ LANGSMITH_API_KEY=your_langsmith_api_key  # Optional
 ### Crawl a Website
 
 ```bash
-python deep_crawler.py https://www.example.com --output data/crawls/example_crawl.csv --depth 3
+uv run python deep_crawler.py https://www.example.com --output data/crawls/example_crawl.csv --depth 3
 ```
 
 ### Index the Crawled Content
 
 ```bash
-python -m src.cli.index_crawl data/crawls/example_crawl.csv
+uv run python -m src.deepcrawl_chat.cli.index_crawl data/crawls/example_crawl.csv
 ```
 
 ### Start the Chat API
 
 ```bash
-uvicorn api.main:app --reload
+uv run uvicorn src.deepcrawl_chat.api.main:app --reload
 ```
 
 Open your browser and navigate to `http://localhost:8000/docs` to access the API documentation and chat with your crawled data.
@@ -120,24 +114,12 @@ DeepCrawl-Chat/
 ```python
 import requests
 
-# Start crawling
-crawl_response = requests.post(
-    "http://localhost:8000/crawl",
-    json={
-        "urls": ["https://www.example.com"],
-        "max_depth": 2,
-        "async_process": False  # Wait for crawling to complete
-    }
-)
-
-crawl_id = crawl_response.json()["crawl_id"]
-
-# Chat with the crawled content
+# Chat with the crawled content directly
 chat_response = requests.post(
     "http://localhost:8000/chat",
     json={
         "query": "What products does the company offer?",
-        "crawl_id": crawl_id
+        "urls": ["https://www.example.com"]
     }
 )
 
@@ -147,13 +129,13 @@ print(chat_response.json()["answer"])
 ### Using Existing Crawl Results
 
 ```bash
-python scripts/load_existing_crawl.py path/to/your/crawl_results.csv
+uv run scripts/load_existing_crawl.py path/to/your/crawl_results.csv
 ```
 
 ### Crawl Options
 
 ```bash
-python deep_crawler.py --help
+uv run deep_crawler.py --help
 ```
 
 This will display all available options for the crawler:
@@ -206,37 +188,15 @@ DeepCrawl-Chat can be configured using environment variables or a .env file:
 
 The DeepCrawl-Chat API provides the following endpoints:
 
-### `/crawl` (POST)
-
-Start a crawling task.
-
-**Request Body:**
-```json
-{
-  "urls": ["https://example.com"],
-  "max_depth": 3,
-  "async_process": true
-}
-```
-
-**Response:**
-```json
-{
-  "status": "processing",
-  "message": "Crawling and indexing started for 1 URLs",
-  "crawl_id": "crawl_1234567890abcdef"
-}
-```
-
 ### `/chat` (POST)
 
-Chat with crawled content.
+Dynamically crawl websites and chat with their content in a single operation using Retrieval Augmented Generation.
 
 **Request Body:**
 ```json
 {
   "query": "What does this website offer?",
-  "crawl_id": "crawl_1234567890abcdef"
+  "urls": ["https://example.com"]
 }
 ```
 
@@ -253,17 +213,17 @@ Chat with crawled content.
 ### Setting Up Development Environment
 
 ```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
+# Sync all development dependencies
+uv sync --dev
 
 # Setup pre-commit hooks
-pre-commit install
+uv run pre-commit install
 ```
 
 ### Running Tests
 
 ```bash
-pytest
+uv run pytest
 ```
 
 ### Docker Development

@@ -8,11 +8,10 @@ from pathlib import Path
 def test_csv_data():
     """Create a sample CSV file for testing."""
     data = {
-        'Type': ['page', 'page', 'image', 'document', 'page'],
+        'Type': ['page', 'page'],
         'URL': [
             'https://python.langchain.com/docs/integrations/chat/',
             'https://python.langchain.com/docs/integrations/retrievers/',
-  
         ]
     }
     return data
@@ -39,7 +38,7 @@ def test_vector_store_dir():
 @pytest.fixture
 def mock_document():
     """Create a mock document for testing."""
-    from langchain.docstore.document import Document
+    from langchain_core.documents import Document
     return Document(
         page_content="This is a test document for DeepCrawl-Chat.",
         metadata={"source": "https://python.langchain.com/docs/integrations/retrievers"}

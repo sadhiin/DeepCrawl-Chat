@@ -5,7 +5,7 @@ import logging
 
 from src.deepcrawl_chat.crawler.integration import process_urls_and_index
 from src.deepcrawl_chat.chains.retrieval import create_chat_chain
-from src.deepcrawl_chat.vectorstores.faiss_store import load_vectorstore
+from src.deepcrawl_chat.vectorstores.faiss_store import get_or_create_vectorstore
 from src.deepcrawl_chat.embeddings.models import get_embeddings_model
 
 router = APIRouter()
@@ -72,8 +72,9 @@ async def chat_endpoint(request: ChatRequest):
         # Determine which vector store to use
         if request.crawl_id:
             # Use an existing vector store
+            from langchain_community.vectorstores import FAISS
             embeddings = get_embeddings_model()
-            vectorstore = load_vectorstore(request.crawl_id, embeddings)
+            vectorstore = FAISS.load_local(request.crawl_id, embeddings, allow_dangerous_deserialization=True)
         elif request.urls:
             # Create a temporary vector store for these URLs
             # This is a simplified version - would need more implementation
