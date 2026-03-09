@@ -7,8 +7,8 @@ import os
 # Add the project root to sys.path if needed
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from src.deep_crawler.integration import CrawlRAGPipeline
-from src.utils.logging import setup_logging
+from src.deepcrawl_chat.crawler.integration import CrawlRAGPipeline
+from src.deepcrawl_chat.utils.logging import setup_logging
 
 def main():
     """Main entry point for indexing crawl results."""
