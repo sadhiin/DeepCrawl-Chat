@@ -3,10 +3,10 @@ from typing import List, Optional
 from pydantic import BaseModel
 import logging
 
-from src.deep_crawler.integration import process_urls_and_index
-from src.chains.retrieval import create_chat_chain
-from src.vectorstores.faiss_store import load_vectorstore
-from src.embeddings.models import get_embeddings_model
+from src.deepcrawl_chat.crawler.integration import process_urls_and_index
+from src.deepcrawl_chat.chains.retrieval import create_chat_chain
+from src.deepcrawl_chat.vectorstores.faiss_store import load_vectorstore
+from src.deepcrawl_chat.embeddings.models import get_embeddings_model
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

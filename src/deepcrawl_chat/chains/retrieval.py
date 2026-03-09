@@ -19,5 +19,21 @@ def get_rag_prompt():
         """
     )
 
-def create_chat_chain():
-    return get_rag_prompt()
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+
+def create_chat_chain(vectorstore):
+    """Create a retrieval chain using a provided vectorstore."""
+    from src.deepcrawl_chat.llm.models import get_llm
+    
+    llm = get_llm()
+    prompt = get_rag_prompt()
+    
+    # Create the document chain
+    document_chain = create_stuff_documents_chain(llm, prompt)
+    
+    # Create the retrieval chain
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    retrieval_chain = create_retrieval_chain(retriever, document_chain)
+    
+    return retrieval_chain
