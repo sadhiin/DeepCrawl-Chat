@@ -3,7 +3,7 @@ name = "deepcrawl-chat"
 version = "0.1.2"
 description = "Crawl a website and chat with it."
 authors = [
-    {name = "Shanjidul Islam Sadhin",email = "sadhin.aiub.cse@gmail.com"}
+    {name = "Shanjidul Islam Sadhin",email = "66504343+sadhiin@users.noreply.github.com"}
 ]
 license = {text = "MIT"}
 readme = "README.md"
