@@ -4,7 +4,7 @@ import pandas as pd
 import tempfile
 import os
 
-from src.data.crawl_loader import CrawlResultLoader
+from src.deepcrawl_chat.data_processing.crawl_loader import CrawlResultLoader
 
 class TestCrawlResultLoader:
 
@@ -26,7 +26,7 @@ class TestCrawlResultLoader:
 
     def test_load_with_valid_csv(self, test_csv_file):
         """Test loading with a valid CSV file."""
-        with patch('src.data.crawl_loader.WebBaseLoader') as mock_loader:
+        with patch('src.deepcrawl_chat.data_processing.crawl_loader.WebBaseLoader') as mock_loader:
             # Mock the WebBaseLoader to return a document
             mock_instance = MagicMock()
             mock_document = MagicMock()

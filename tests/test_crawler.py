@@ -4,7 +4,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 import asyncio
 
-from deep_crawler import (
+from src.deepcrawl_chat.crawler.core import (
     CrawlConfig,
     WebCrawler,
     UrlUtils,
@@ -58,7 +58,7 @@ class TestWebCrawler:
         assert crawler.urls_to_visit[0] == ("https://example.com", 0)
 
     @pytest.mark.asyncio
-    @patch('deep_crawler.aiohttp.ClientSession')
+    @patch('src.deepcrawl_chat.crawler.core.aiohttp.ClientSession')
     async def test_process_url(self, mock_session):
         """Test URL processing."""
         # Setup mocks

@@ -2,13 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 
-from api.main import app
+from src.deepcrawl_chat.api.main import app
+import src.deepcrawl_chat.api.v1.endpoints.chat as chat_endpoints
 
 client = TestClient(app)
 
 class TestChatAPI:
 
-    @patch('api.routes.chat.process_urls_and_index')
+    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.process_urls_and_index')
     def test_start_crawling_async(self, mock_process):
         """Test the /crawl endpoint with async processing."""
         response = client.post(
@@ -21,7 +22,7 @@ class TestChatAPI:
         assert "crawl_id" in response.json()
         mock_process.assert_not_called()  # Should be called as background task
 
-    @patch('api.routes.chat.CrawlRAGPipeline')
+    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.CrawlRAGPipeline')
     def test_start_crawling_sync(self, mock_pipeline):
         """Test the /crawl endpoint with synchronous processing."""
         # Configure mock
@@ -51,9 +52,9 @@ class TestChatAPI:
         assert response.status_code == 400
         assert "No URLs provided" in response.json()["detail"]
 
-    @patch('api.routes.chat.get_embeddings_model')
-    @patch('api.routes.chat.load_vectorstore')
-    @patch('api.routes.chat.create_chat_chain')
+    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.get_embeddings_model')
+    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.load_vectorstore')
+    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.create_chat_chain')
     def test_chat_with_crawl_id(self, mock_chain, mock_load, mock_embeddings):
         """Test the /chat endpoint with a crawl_id."""
         # Configure mocks
