@@ -27,7 +27,7 @@ async def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Deep Web Crawler')
-    parser.add_argument('url', default="https://www.langchain.com/",help='Starting URL to crawl')
+    parser.add_argument('url', default="https://sadhiin.github.io",help='Starting URL to crawl')
     parser.add_argument('-o', '--output', default='crawl_results.csv', help='Output CSV file')
     parser.add_argument('-d', '--delay', type=float, default=0.5, help='Delay between requests')
     parser.add_argument('--depth', type=int, default=5, help='Maximum crawl depth')

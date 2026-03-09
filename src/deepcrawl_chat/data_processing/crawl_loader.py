@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import List, Optional, Dict, Any
 from langchain_community.document_loaders import WebBaseLoader
-from langchain.docstore.document import Document
+from langchain_core.documents import Document
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
