@@ -114,24 +114,12 @@ DeepCrawl-Chat/
 ```python
 import requests
 
-# Start crawling
-crawl_response = requests.post(
-    "http://localhost:8000/crawl",
-    json={
-        "urls": ["https://www.example.com"],
-        "max_depth": 2,
-        "async_process": False  # Wait for crawling to complete
-    }
-)
-
-crawl_id = crawl_response.json()["crawl_id"]
-
-# Chat with the crawled content
+# Chat with the crawled content directly
 chat_response = requests.post(
     "http://localhost:8000/chat",
     json={
         "query": "What products does the company offer?",
-        "crawl_id": crawl_id
+        "urls": ["https://www.example.com"]
     }
 )
 
@@ -200,37 +188,15 @@ DeepCrawl-Chat can be configured using environment variables or a .env file:
 
 The DeepCrawl-Chat API provides the following endpoints:
 
-### `/crawl` (POST)
-
-Start a crawling task.
-
-**Request Body:**
-```json
-{
-  "urls": ["https://example.com"],
-  "max_depth": 3,
-  "async_process": true
-}
-```
-
-**Response:**
-```json
-{
-  "status": "processing",
-  "message": "Crawling and indexing started for 1 URLs",
-  "crawl_id": "crawl_1234567890abcdef"
-}
-```
-
 ### `/chat` (POST)
 
-Chat with crawled content.
+Dynamically crawl websites and chat with their content in a single operation using Retrieval Augmented Generation.
 
 **Request Body:**
 ```json
 {
   "query": "What does this website offer?",
-  "crawl_id": "crawl_1234567890abcdef"
+  "urls": ["https://example.com"]
 }
 ```
 
