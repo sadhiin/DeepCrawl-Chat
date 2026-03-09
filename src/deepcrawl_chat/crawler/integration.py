@@ -5,12 +5,10 @@ from typing import List, Optional
 import logging
 from pathlib import Path
 
-from src.data.crawl_loader import CrawlResultLoader
-from src.data.processors import DeepCrawlTextSplitter
-from src.embeddings.models import get_embeddings_model
-from src.vectorstores.faiss_store import get_or_create_vectorstore
-
-from 
+from src.deepcrawl_chat.data_processing.crawl_loader import CrawlResultLoader
+from src.deepcrawl_chat.data_processing.processors import DeepCrawlTextSplitter
+from src.deepcrawl_chat.embeddings.models import get_embeddings_model
+from src.deepcrawl_chat.vectorstores.faiss_store import get_or_create_vectorstore
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +57,7 @@ class CrawlRAGPipeline:
         crawl_path = os.path.join(self.output_dir, crawl_filename)
 
         # Import and run the crawler
-        from src.deep_crawler.crawler import WebCrawler, CrawlConfig
+        from src.deepcrawl_chat.crawler.core import WebCrawler, CrawlConfig
 
         config = CrawlConfig(
             start_url=url,
