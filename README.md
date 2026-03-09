@@ -39,7 +39,7 @@ DeepCrawl-Chat is an intelligent web crawling and retrieval augmented generation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/DeepCrawl-Chat.git
+git clone https://github.com/sadhiin/DeepCrawl-Chat.git
 cd DeepCrawl-Chat
 ```
 
