@@ -1,6 +1,6 @@
-from src.utils.logging import logger
+from src.deepcrawl_chat.utils.logging import logger
 from langchain_community.document_loaders import UnstructuredURLLoader, WebBaseLoader
-from config.settings import settings
+from src.deepcrawl_chat.config.settings import settings
 
 class DocumentLoader:
     def __init__(self, loader_type=settings.DOCUMENT_LOADER):
