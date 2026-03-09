@@ -9,87 +9,59 @@ client = TestClient(app)
 
 class TestChatAPI:
 
-    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.process_urls_and_index')
-    def test_start_crawling_async(self, mock_process):
-        """Test the /crawl endpoint with async processing."""
+    def test_chat_no_urls(self):
+        """Test the /chat endpoint with no URLs."""
         response = client.post(
-            "/crawl",
-            json={"urls": ["https://python.langchain.com/docs/integrations/retrievers/"], "max_depth": 2, "async_process": True}
+            "/chat",
+            json={"query": "What is DeepCrawl?", "urls": []}
         )
 
-        assert response.status_code == 200
-        assert response.json()["status"] == "processing"
-        assert "crawl_id" in response.json()
-        mock_process.assert_not_called()  # Should be called as background task
+        assert response.status_code == 400, response.json()
+        assert "URLs must be provided" in response.json()["detail"]
 
-    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.CrawlRAGPipeline')
-    def test_start_crawling_sync(self, mock_pipeline):
-        """Test the /crawl endpoint with synchronous processing."""
-        # Configure mock
-        mock_instance = MagicMock()
-        mock_instance.crawl_and_index.return_value = "test_store_path"
-        mock_pipeline.return_value = mock_instance
+    @patch('src.deepcrawl_chat.api.main.DocumentLoader')
+    @patch('src.deepcrawl_chat.api.main.DeepCrawlTextSplitter', create=True)
+    @patch('src.deepcrawl_chat.api.main.get_embeddings_model')
+    @patch('src.deepcrawl_chat.api.main.get_or_create_vectorstore')
+    @patch('src.deepcrawl_chat.api.main.create_chat_chain')
+    def test_chat_with_urls(self, mock_chain, mock_vectorstore, mock_embeddings, mock_splitter, mock_loader):
+        """Test the /chat endpoint with URLs."""
+        from langchain_core.documents import Document
 
-        response = client.post(
-            "/crawl",
-            json={"urls": ["https://langchain.com/"], "max_depth": 2, "async_process": False}
-        )
-
-        assert response.status_code == 200
-        assert response.json()["status"] == "completed"
-        assert response.json()["crawl_id"] == "test_store_path"
-        mock_instance.crawl_and_index.assert_called_once_with(
-            "https://langchain.com/ ", max_depth=2
-        )
-
-    def test_crawl_no_urls(self):
-        """Test the /crawl endpoint with no URLs."""
-        response = client.post(
-            "/crawl",
-            json={"urls": [], "max_depth": 2}
-        )
-
-        assert response.status_code == 400
-        assert "No URLs provided" in response.json()["detail"]
-
-    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.get_embeddings_model')
-    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.load_vectorstore')
-    @patch('src.deepcrawl_chat.api.v1.endpoints.chat.create_chat_chain')
-    def test_chat_with_crawl_id(self, mock_chain, mock_load, mock_embeddings):
-        """Test the /chat endpoint with a crawl_id."""
         # Configure mocks
-        mock_embeddings.return_value = "embeddings_model"
-        mock_load.return_value = "vectorstore"
+        mock_loader_instance = MagicMock()
+        doc_mock = Document(page_content="doc1", metadata={"source": "url"})
+        mock_loader_instance.load_from_urls.return_value = [doc_mock]
+        mock_loader.return_value = mock_loader_instance
+
+        mock_splitter_instance = MagicMock()
+        chunk_mock = Document(page_content="chunk1", metadata={"source": "url"})
+        mock_splitter_instance.split_documents.return_value = [chunk_mock]
+        mock_splitter.return_value = mock_splitter_instance
+
+        mock_embeddings.return_value = "embeddings"
+        mock_vectorstore.return_value = "vectorstore"
 
         mock_chain_instance = MagicMock()
         mock_chain_instance.invoke.return_value = {
             "answer": "This is a test answer",
-            "source_documents": [
-                MagicMock(metadata={"source": "https://example.com/page1"})
+            "context": [
+                Document(page_content="chunk1", metadata={"source": "https://example.com/page1"})
             ]
         }
         mock_chain.return_value = mock_chain_instance
 
         response = client.post(
             "/chat",
-            json={"query": "What is DeepCrawl?", "crawl_id": "test_crawl_id"}
+            json={"query": "What is DeepCrawl?", "urls": ["https://example.com"]}
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.json()
         assert response.json()["answer"] == "This is a test answer"
         assert response.json()["sources"] == ["https://example.com/page1"]
 
-        mock_embeddings.assert_called_once()
-        mock_load.assert_called_once_with("test_crawl_id", "embeddings_model")
+        mock_loader_instance.load_from_urls.assert_called_once_with(["https://example.com"])
+        mock_splitter_instance.split_documents.assert_called_once()
+        mock_vectorstore.assert_called_once_with([chunk_mock], "embeddings")
         mock_chain.assert_called_once_with("vectorstore")
-        mock_chain_instance.invoke.assert_called_once_with({"input": "What is DeepCrawl?"})
-
-    def test_chat_no_source(self):
-        """Test the /chat endpoint with no source specified."""
-        response = client.post(
-            "/chat",
-            json={"query": "What is DeepCrawl?"}
-        )
-
-        assert response.status_code == 400
-        assert "Either crawl_id or urls must be provided" in response.json()["detail"] 
+        mock_chain_instance.invoke.assert_called_once_with({"input": "What is DeepCrawl?"}) 
